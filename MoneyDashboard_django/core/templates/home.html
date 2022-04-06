@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.1.4/dist/css/datepicker.min.css">
+</head>
+<body>
+    <header>
+        <div class="header_items">
+            <p class="logo_text">Goose</p>
+            <div class="login_buttons">
+                {% if request.user.is_authenticated %}
+                <a class="button_round" href="http://127.0.0.1:8000/admin" target="blank">{{ request.user.username }} | go to admin panel</a>
+                <a class="button_round" href="{% url 'sign-out' %}">Sign Out</a>
+                {% else %}
+                <a class="button_round" href="http://127.0.0.1:8000/admin" target="blank">Admin</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+    <main>
+
+    {% block content %}
+    <div class="title_name_block">
+        {% if actions %}
+        <p class="block-title">Last actions</p>
+        {% else %}
+        <p class="block-title">No actions</p>
+        {% endif %}
+        <div class="actions">
+            <a class="button_round" href="{% url 'create-action' %}">Create</a>
+            <span>or</span>
+            <form class="search_form" action="{% url 'search-results' %}" method="get">
+                <input id="id_date" name="q" type="text" placeholder="Input date...">
+                <input class="button_round" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+    <hr>
+        
+    <div class="container">
+        {% for action in actions %}
+        <div class="card">
+            <a class="name" href="{% url 'update-action' pk=action.pk %}">{{ action.title }}</a>
+            <div class="list">
+                {% if action.action_type == 'increase' %}
+                <p class="money increase">{{ action.money }} <span>BYN</span></p>
+                {% else %}
+                <p class="money spending">{{ action.money }} <span>BYN</span></p>
+                {% endif %}
+                <p class="date">{{ action.date }}</p>
+                <a class="button_round delete" href="{% url 'delete-action' pk=action.pk %}">Delete</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% if actions %}
+    <div class="title_name_block">
+        <p class="block-title">Total</p>
+    </div>
+    <hr>
+    {% endif %}
+    {% endblock content %}
+
+    </main>
+    <footer></footer>
+    <script src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.1.4/dist/js/datepicker-full.min.js"></script>
+
+    <script>
+        const elem = document.getElementById("id_date");
+        // const datepicker = new Datepicker(elem, {format: "dd.mm.yyyy",});
+        const datepicker = new Datepicker(elem, {format: "yyyy-mm-dd",});
+        fetchFileBtn.addEventListener("click", async () => {
+            const inputDate = datepicker.getDate().getTime();})
+    </script>
+</body>
+</html>

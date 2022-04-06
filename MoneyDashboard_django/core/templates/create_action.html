@@ -1,0 +1,19 @@
+{% extends 'home.html' %}
+{% block title %}Create action{% endblock %}
+{% block content %}
+    <div class="title_name_block">
+        <p class="block-title">Create Action</p>
+        <div class="actions">
+
+            <a class="button_round" href="{% url 'home' %}">Back</a>
+        </div>
+    </div>
+    <hr>
+    <div class="container">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input class="button_round" type="submit" value="Save">
+        </form>
+    </div>
+{% endblock content %}

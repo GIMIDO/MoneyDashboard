@@ -1,0 +1,32 @@
+{% extends "home.html" %}
+{% block title %}Search{% endblock %}
+{% block content %}
+    <div class="title_name_block">
+        {% if actions %}
+        <p class="block-title">Results for {{ search_q }}</p>
+        {% else %}
+        <p class="block-title">No results for {{ search_q }}</p>
+        {% endif %}
+        <div class="actions">
+            <a class="button_round" href="{% url 'home' %}">Back</a>
+        </div>
+    </div>
+    <hr>
+    <div class="container">
+        {% for action in actions %}
+        <div class="card">
+            <a class="name" href="{% url 'update-action' pk=action.pk %}">{{ action.title }}</a>
+            <div class="list">
+                {% if action.action_type == 'increase' %}
+                <p class="money increase">{{ action.money }} <span>BYN</span></p>
+                {% else %}
+                <p class="money spending">{{ action.money }} <span>BYN</span></p>
+                {% endif %}
+                <p class="date">{{ action.date }}</p>
+                <!-- <input type="hidden" name="next" value="{{ request.path }}"> -->
+                <a class="button_round delete" href="{% url 'delete-action' pk=action.pk %}?next={{ request.path }}">Delete</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}
