@@ -5,46 +5,56 @@
     <title>Home</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.1.4/dist/css/datepicker.min.css">
 </head>
 <body>
     <header>
         <div class="header_items">
-            <p class="logo_text">Goose</p>
+            <p class="logo_text">Cash accounting</p>
             <div class="login_buttons">
                 {% if request.user.is_authenticated %}
-                <a class="button_round" href="http://127.0.0.1:8000/admin" target="blank">{{ request.user.username }} | go to admin panel</a>
+                <p class="message">{{ request.user.username }}</p>
                 <a class="button_round" href="{% url 'sign-out' %}">Sign Out</a>
-                {% else %}
-                <a class="button_round" href="http://127.0.0.1:8000/admin" target="blank">Admin</a>
                 {% endif %}
             </div>
         </div>
     </header>
     <main>
-
     {% block content %}
+    <div class="container">
+        <p class="message">Total amount: {{ total_amount }} BYN</p>
+        {% if messages %}
+        {% for message in messages %}
+        <span class="message message_{{ message.tags }}">{{ message }}</span>
+        {% endfor %}
+        {% endif %}
+    </div>
     <div class="title_name_block">
-        {% if actions %}
-        <p class="block-title">Last actions</p>
+        {% if page_obj %}
+        <p class="block-title">All actions</p>
         {% else %}
         <p class="block-title">No actions</p>
         {% endif %}
         <div class="actions">
             <a class="button_round" href="{% url 'create-action' %}">Create</a>
+            {% if page_obj %}
             <span>or</span>
             <form class="search_form" action="{% url 'search-results' %}" method="get">
-                <input id="id_date" name="q" type="text" placeholder="Input date...">
-                <input class="button_round" type="submit" value="Search">
+                <p class="search_p">from</p>
+                <input name="from" type="date" placeholder="Date from...">
+                <p class="search_p">to</p>
+                <input name="to" type="date" placeholder="Date to...">
+                <input id="button_round" type="submit" value="Search">
             </form>
+            {% endif %}
         </div>
     </div>
+
     <hr>
-        
+
     <div class="container">
-        {% for action in actions %}
+        {% for action in page_obj %}
         <div class="card">
-            <a class="name" href="{% url 'update-action' pk=action.pk %}">{{ action.title }}</a>
+            <a class="name" href="{% url 'update-action' action.pk %}?next={{ request.path }}">{{ action.title }}</a>
             <div class="list">
                 {% if action.action_type == 'increase' %}
                 <p class="money increase">{{ action.money }} <span>BYN</span></p>
@@ -52,29 +62,43 @@
                 <p class="money spending">{{ action.money }} <span>BYN</span></p>
                 {% endif %}
                 <p class="date">{{ action.date }}</p>
-                <a class="button_round delete" href="{% url 'delete-action' pk=action.pk %}">Delete</a>
+                <a class="button_round delete" href="{% url 'delete-action' pk=action.pk %}?next={{ request.path }}">Delete</a>
             </div>
         </div>
         {% endfor %}
     </div>
-    {% if actions %}
+
+    <div class="container">
+        {% if page_obj.has_other_pages %}
+        <span class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page=1" class="button_round">First</a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="button_round">&laquo;</a>
+            {% endif %}
+            <span>
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="button_round">&raquo;</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="button_round">Last</a>
+            {% endif %}
+        </span>
+        {% endif %}
+    </div>
+    
+    {% if page_obj %}
     <div class="title_name_block">
-        <p class="block-title">Total</p>
+        <p class="block-title">Download actions</p>
     </div>
     <hr>
+    <div class="container">
+        <a class="button_round" href="{% url 'download'%}">Download all actions as JSON</a>
+    </div>
     {% endif %}
+
     {% endblock content %}
 
     </main>
     <footer></footer>
-    <script src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.1.4/dist/js/datepicker-full.min.js"></script>
-
-    <script>
-        const elem = document.getElementById("id_date");
-        // const datepicker = new Datepicker(elem, {format: "dd.mm.yyyy",});
-        const datepicker = new Datepicker(elem, {format: "yyyy-mm-dd",});
-        fetchFileBtn.addEventListener("click", async () => {
-            const inputDate = datepicker.getDate().getTime();})
-    </script>
 </body>
 </html>

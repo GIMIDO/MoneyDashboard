@@ -1,5 +1,3 @@
-from operator import mod
-from tabnanny import verbose
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth import get_user_model
@@ -27,3 +25,4 @@ class Action(models.Model):
 
     def __str__(self) -> str:
         return f'{self.title} ({self.money}) ({self.user.username})'
+

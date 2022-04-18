@@ -1,12 +1,15 @@
-from dataclasses import field
 from django import forms
 from django.contrib.auth.models import User
 
 from .models import *
 
 
+class DateInput(forms.DateInput):
+    input_type = 'date'
+
+
 class LoginForm(forms.Form):
-    
+
     class Meta:
         model = User
         fields = ['username', 'password']
@@ -30,7 +33,7 @@ class RegistrationForm(forms.ModelForm):
 
     confirm_password = forms.CharField(widget=forms.PasswordInput)
     password = forms.CharField(widget=forms.PasswordInput)
-    email = forms.EmailField(required=True)
+    email = forms.EmailField(required=Falseо)
 
     class Meta:
         model = User
@@ -55,6 +58,11 @@ class RegistrationForm(forms.ModelForm):
 
 class ActionForm(forms.ModelForm):
 
+    money = forms.CharField(widget=forms.TextInput(attrs={'min':'0.01','max': '9999999','type': 'number', 'step':'0.01'}))
+
     class Meta:
         model = Action
         fields = ['title','money','date','action_type']
+        widgets = {
+            'date': DateInput()
+        }

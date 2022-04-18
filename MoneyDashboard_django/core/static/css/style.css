@@ -9,7 +9,7 @@ hr {
     height: 1px;
     margin: 5px 0;
 }
-span {
+span, form > span {
     font-family: "Google Sans";
     font-size: 16px;
     padding: 0 5px;
@@ -18,7 +18,7 @@ header {
     background: #F8F8F8;
     color: #000000;
     padding: 5px 0;
-    margin: 0 0 40px 0;
+    margin: 0 0 25px 0;
     font-family: "Google Sans";
     box-shadow: 0 0px 15px 1px rgba(0, 0, 0, 0.29);
 }
@@ -28,7 +28,7 @@ header {
     margin: 0 auto;
     width: 960px;
 }
-.button_round {
+.button_round, #button_round {
     width: max-content;
     font-family: "Google Sans";
     font-size: 16px;
@@ -39,15 +39,19 @@ header {
     color: #000000;
     text-decoration: none;
 }
-.button_round:hover {
+.button_round:hover,
+#button_round:hover {
     cursor: pointer;
     background: #e6e6e6;
 }
-
-.login_buttons > .button_round {
+.login_buttons {
+    display: flex;
+    flex-direction: row;
+}
+.login_buttons > * {
     margin-right: 2.5px;
 }
-.login_buttons > .button_round:last-child {
+.login_buttons > *:last-child {
     margin-right: 0;
 }
 .logo_text {
@@ -64,9 +68,8 @@ main {
 }
 
 .title_name_block {
-    margin-top: 25px;
+    margin-top: 15px;
     display: flex;
-
 }
 
 .block-title {
@@ -81,6 +84,7 @@ main {
     display: flex;
     flex-wrap: wrap;
     width: 960px;
+    margin-bottom: 15px;
 }
 .container > form > input.button_round {
     margin: 5px 10px;
@@ -89,7 +93,7 @@ main {
     margin: 2px 10px;
     padding: 2px 0 ;
     height: auto;
-    width: 100%;
+    width: calc(100% - 20px);
     
     display: flex;
     flex-direction: row;
@@ -98,42 +102,56 @@ main {
     font-family: "Google Sans";
     
 }
+
 .name {
-    width: 100%;
-    font-size: 18px;
+    max-width: 940px;
+    width: 940px;
+    font-size: 14px;
     text-decoration: none;
     color: #000000;
     border-top: 1px solid #CCCCCC;
     border-bottom: 1px solid #CCCCCC;
     padding: 5px 5px;
     margin-right: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .name:hover {
-    
     cursor: pointer;
     background: #e6e6e6;
 }
+
 .list {
     display: flex;
     flex-direction: row;
     margin-left: auto;
-    width: auto;
-    font-size: 16px;
+    font-size: 14px;
     white-space: nowrap;
     align-items: center;
+    max-width: 300px;
 }
 .list > * {
     padding: 5px 10px;
     border: 1px solid #CCCCCC;
     border-radius: 0;
+    width: auto;
 }
 .list > *:first-child {
+    width: max-content;
     border-radius: 4px 0 0 4px;
     border-right: 0;
 }
 .list > *:last-child {
+    width: max-content;
     border-radius: 0 4px 4px 0;
     border-left: 0;
+}
+.money > span {
+    font-size: 14px;
+}
+.delete {
+    font-size: 14px;
 }
 .delete:hover {
     background-color: rgb(255, 136, 136);
@@ -159,6 +177,14 @@ form > p {
     display: flex;
     margin: 5px 0 5px 0;
     padding: 0 10px;
+    align-items: center;
+}
+form > p.search_p {
+    display: flex;
+    margin: 5px -2.5px 5px -5px;
+    padding: 0 10px;
+    align-items: center;
+    color:rgba(0, 0, 0, 0.29);
 }
 label {
     max-width: 20%;
@@ -195,9 +221,6 @@ form > ul.errorlist {
 ul.errorlist > li {
     margin-left: 10px;
 }
-.datepicker, .datepicker-controls > .button {
-    font-family: "Google Sans";
-}
 
 span.helptext {
     display: none;
@@ -209,26 +232,50 @@ span.helptext {
     align-items: center;
 }
 .actions > form > input {
+    border: 0;
+    border-radius: 4px;
     padding: 5px;
     margin: 0;
+    margin-right: 2.5px;
 }
 .actions > form > input[type=submit] {
     padding: 5px 15px;
     margin: 0;
 }
+.actions > form > input[type=date] {
+    padding-left: 10px;
+}
 .actions > form {
     display: flex;
     flex-direction: row;
-}
-.actions > form > * {
-    border-radius: 0;
-}
-.actions > form > input:last-child {
-    border-radius: 0 4px 4px 0;
 }
 .actions > * {
     margin-right: 2.5px;
 }
 .actions > *:last-child {
     margin-right: 0;
+}
+
+.message {
+    margin: 2.5px 2.5px 0 0 ;
+    width: max-content;
+    padding: 5px 15px;
+    border-radius: 4px;
+    font-family: "Google Sans";
+    background-color: #E6E6E6;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.message_success {
+    color: #009d00;
+}
+.message_warning {
+    color: #9d0000;
+}
+
+.pagination {
+    margin: 0 auto;
 }
