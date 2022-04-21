@@ -33,14 +33,11 @@ class RegistrationForm(forms.ModelForm):
 
     confirm_password = forms.CharField(widget=forms.PasswordInput)
     password = forms.CharField(widget=forms.PasswordInput)
-    email = forms.EmailField(required=Falseо)
+    email = forms.EmailField(required=False)
 
     class Meta:
         model = User
         fields = ['username', 'password', 'confirm_password', 'email']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
     def clean_username(self):
         username = self.cleaned_data['username']
@@ -66,3 +63,7 @@ class ActionForm(forms.ModelForm):
         widgets = {
             'date': DateInput()
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['title'].label = 'Title'
