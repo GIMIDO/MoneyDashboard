@@ -1,10 +1,12 @@
 {% extends 'home.html' %}
-{% block title %}Create action{% endblock %}
+{% block title %}Action/Category manager{% endblock %}
 {% block content %}
     <div class="title_name_block">
-        <p class="block-title">Create Action</p>
+        <p class="block-title">{{ page_title }}</p>
         <div class="actions">
-            <a class="button_round" href="{% url 'home' %}">Back</a>
+            {% if button_url %}
+            <a class="button_round" href="{% url button_url %}">{{ button_title }}</a>
+            {% endif %}
         </div>
     </div>
     <hr>

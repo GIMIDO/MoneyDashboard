@@ -26,10 +26,10 @@ header {
     align-items: center;
     display: flex;
     margin: 0 auto;
-    width: 960px;
+    width: 1060px;
 }
 .button_round, #button_round {
-    width: max-content;
+    width: auto;
     font-family: "Google Sans";
     font-size: 16px;
     background: #ffffff;
@@ -63,7 +63,7 @@ header {
 }
 
 main {
-    width: 960px;
+    width: 1060px;
     margin: 0 auto;
 }
 
@@ -83,7 +83,7 @@ main {
 .container {
     display: flex;
     flex-wrap: wrap;
-    width: 960px;
+    width: 1060px;
     margin-bottom: 15px;
 }
 .container > form > input.button_round {
@@ -184,7 +184,7 @@ form > p.search_p {
     margin: 5px -2.5px 5px -5px;
     padding: 0 10px;
     align-items: center;
-    color:rgba(0, 0, 0, 0.29);
+    color:rgba(0, 0, 0, 1);
 }
 label {
     max-width: 20%;
@@ -237,6 +237,15 @@ span.helptext {
     padding: 5px;
     margin: 0;
     margin-right: 2.5px;
+    min-width: 5em;
+}
+.actions > form > select.long_select {
+    border: 0;
+    border-radius: 4px;
+    padding: 5px;
+    margin: 0;
+    margin-right: 2.5px;
+    min-width: 15em;
 }
 .actions > form > input[type=submit] {
     padding: 5px 15px;

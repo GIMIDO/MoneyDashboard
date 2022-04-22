@@ -55,14 +55,27 @@ class RegistrationForm(forms.ModelForm):
 
 class ActionForm(forms.ModelForm):
 
-    money = forms.CharField(widget=forms.TextInput(attrs={'min':'0.01','max': '9999999','type': 'number', 'step':'0.01'}))
+    money = forms.CharField(widget=forms.TextInput(
+        attrs={'min':'0.01','max': '9999999','type': 'number', 'step':'0.01'}))
 
     class Meta:
         model = Action
-        fields = ['title','money','date','action_type']
+        fields = ['title','category','money','date','action_type']
         widgets = {
             'date': DateInput()
         }
+
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['title'].label = 'Title'
+        self.fields['category'].queryset = Category.objects.filter(user=user)
+
+
+class CategoryForm(forms.ModelForm):
+
+    class Meta:
+        model = Action
+        fields = ['title']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

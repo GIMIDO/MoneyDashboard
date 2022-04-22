@@ -28,6 +28,7 @@
         {% endfor %}
         {% endif %}
     </div>
+
     <div class="title_name_block">
         {% if page_obj %}
         <p class="block-title">All actions</p>
@@ -35,26 +36,16 @@
         <p class="block-title">No actions</p>
         {% endif %}
         <div class="actions">
-            <a class="button_round" href="{% url 'create-action' %}">Create</a>
-            {% if page_obj %}
-            <span>or</span>
-            <form class="search_form" action="{% url 'search-results' %}" method="get">
-                <p class="search_p">from</p>
-                <input name="from" type="date" placeholder="Date from...">
-                <p class="search_p">to</p>
-                <input name="to" type="date" placeholder="Date to...">
-                <input id="button_round" type="submit" value="Search">
-            </form>
-            {% endif %}
+            <a class="button_round" href="{% url 'create-action' %}">Create&nbspAction</a>
+            <a class="button_round" href="{% url 'create-category' %}">Create&nbspCategory</a>
         </div>
     </div>
-
     <hr>
 
     <div class="container">
         {% for action in page_obj %}
         <div class="card">
-            <a class="name" href="{% url 'update-action' action.pk %}?next={{ request.path }}">{{ action.title }}</a>
+            <a class="name" href="{% url 'update-action' action.pk %}?next={{ request.path }}">({{ action.category.title }}) {{ action.title }}</a>
             <div class="list">
                 {% if action.action_type == 'increase' %}
                 <p class="money increase">{{ action.money }} <span>BYN</span></p>
@@ -88,6 +79,27 @@
     
     {% if page_obj %}
     <div class="title_name_block">
+        <p class="block-title">Search</p>
+        <div class="actions">
+            <form class="search_form" action="{% url 'search-results' %}" method="get">
+                <p class="search_p">category</p>
+                <select class="long_select" name="category" type="text">
+                    <option></option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.title }}</option>
+                    {% endfor %}
+                </select>
+                <p class="search_p">from</p>
+                <input name="from" type="date" placeholder="Date from...">
+                <p class="search_p">to</p>
+                <input name="to" type="date" placeholder="Date to...">
+                <input id="button_round" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+    <hr>
+
+    <div class="title_name_block">
         <p class="block-title">Download actions</p>
     </div>
     <hr>
@@ -95,9 +107,7 @@
         <a class="button_round" href="{% url 'download'%}">Download all actions as JSON</a>
     </div>
     {% endif %}
-
     {% endblock content %}
-
     </main>
     <footer></footer>
 </body>

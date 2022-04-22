@@ -11,16 +11,22 @@
     </div>
     <div class="title_name_block">
         {% if page_obj %}
+            <p class="block-title">Results
             {% if q_from %}
                 {%if q_to %}
-                <p class="block-title">Results from {{ q_from }} to {{ q_to }}</p>
+                from {{ q_from }} to {{ q_to }}
                 {% else %}
-                <p class="block-title">Results from {{ q_from }}</p>
+                from {{ q_from }}
                 {% endif %}
             {% else %}
                 {% if q_to %}
-                <p class="block-title">Results to {{ q_to }}</p>
+                to {{ q_to }}
                 {% endif %}
+            {% endif %}
+            {% if q_category %}
+                ({{ category_out.title }})</>
+            {{ else }}
+                </p>
             {% endif %}
         {% else %}
         <p class="block-title">No results</p>
@@ -33,7 +39,7 @@
     <div class="container">
         {% for action in page_obj %}
         <div class="card">
-            <a class="name" href="{% url 'update-action' pk=action.pk %}?next={{ request.get_full_path|urlencode }}">{{ action.title }}</a>
+            <a class="name" href="{% url 'update-action' pk=action.pk %}?next={{ request.get_full_path|urlencode }}">({{ action.category }}) {{ action.title }}</a>
             <div class="list">
                 {% if action.action_type == 'increase' %}
                 <p class="money increase">{{ action.money }} <span>BYN</span></p>
@@ -73,7 +79,7 @@
     </div>
     <hr>
     <div class="container">
-        <a class="button_round" href="{% url 'download' %}?from={{ request.GET.from }}&to={{ request.GET.to }}">Download searched actions as JSON</a>
+        <a class="button_round" href="{% url 'download' %}?from={{ request.GET.from }}&to={{ request.GET.to }}&category={{ request.GET.category }}">Download searched actions as JSON</a>
     </div>
     {% endif %}
 {% endblock %}
