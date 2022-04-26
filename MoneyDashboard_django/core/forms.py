@@ -60,7 +60,7 @@ class ActionForm(forms.ModelForm):
 
     class Meta:
         model = Action
-        fields = ['title','category','money','date','action_type']
+        fields = ['title','category','wallet','money','date','action_type']
         widgets = {
             'date': DateInput()
         }
@@ -69,6 +69,7 @@ class ActionForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['title'].label = 'Title'
         self.fields['category'].queryset = Category.objects.filter(user=user)
+        self.fields['wallet'].queryset = Wallet.objects.filter(user=user)
 
 
 class CategoryForm(forms.ModelForm):
@@ -76,6 +77,35 @@ class CategoryForm(forms.ModelForm):
     class Meta:
         model = Action
         fields = ['title']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['title'].label = 'Title'
+
+
+class WalletForm(forms.ModelForm):
+
+    start_amount = forms.CharField(widget=forms.TextInput(
+        attrs={'min':'0.01','max': '9999999','type': 'number', 'step':'0.01'}))
+
+    class Meta:
+        model = Wallet
+        fields = ['title','currency','start_amount']
+
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['title'].label = 'Title'
+        self.fields['currency'].queryset = Currency.objects.filter(user=user)
+
+
+class CurrencyForm(forms.ModelForm):
+
+    coef = forms.CharField(widget=forms.TextInput(
+        attrs={'min':'0.01','max': '9999999','type': 'number', 'step':'0.01'}))
+
+    class Meta:
+        model = Currency
+        fields = ['title','coef']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

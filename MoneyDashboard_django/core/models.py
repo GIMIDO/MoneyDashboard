@@ -21,6 +21,51 @@ class Category(models.Model):
         return f'{self.title}'
 
 
+class Currency(models.Model):
+
+    user = models.ForeignKey(
+        User,
+        verbose_name='User',
+        on_delete=models.CASCADE)
+
+    title = models.CharField(
+        verbose_name='Currency',
+        max_length=255)
+
+    coef = models.DecimalField(
+        max_digits=9,
+        decimal_places=2,
+        verbose_name='Coefficient'
+    )
+
+    def __str__(self) -> str:
+        return f'{self.title} [{self.coef}]'
+
+class Wallet(models.Model):
+
+    user = models.ForeignKey(
+        User,
+        verbose_name='User',
+        on_delete=models.CASCADE)
+
+    currency = models.ForeignKey(
+        Currency,
+        verbose_name='Currency',
+        on_delete=models.CASCADE)
+
+    title = models.CharField(
+        verbose_name='Wallet',
+        max_length=255)
+
+    start_amount = models.DecimalField(
+        max_digits=9,
+        decimal_places=2,
+        verbose_name='Start amount')
+
+    def __str__(self) -> str:
+        return f'{self.title} {self.currency}'
+
+
 class Action(models.Model):
 
     INCREASE = 'increase'
@@ -39,6 +84,11 @@ class Action(models.Model):
     category = models.ForeignKey(
         Category,
         verbose_name='Category',
+        on_delete=models.CASCADE)
+
+    wallet = models.ForeignKey(
+        Wallet,
+        verbose_name='Wallet',
         on_delete=models.CASCADE)
 
     title = models.CharField(
@@ -64,4 +114,7 @@ class Action(models.Model):
         verbose_name='Created at')
 
     def __str__(self) -> str:
-        return f'{self.title} ({self.category}) {self.money} [{self.user.username}]'
+        return f'{self.title} \
+                 ({self.category}) \
+                 {self.money} \
+                 [{self.user.username}]'

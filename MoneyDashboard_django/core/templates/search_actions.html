@@ -47,7 +47,7 @@
                 <p class="money spending">{{ action.money }} <span>BYN</span></p>
                 {% endif %}
                 <p class="date">{{ action.date }}</p>
-                <a class="button_round delete" href="{% url 'delete-action' pk=action.pk %}?next={{ request.get_full_path|urlencode }}">Delete</a>
+                <a class="button_round delete" href="{% url 'delete-action' pk=action.pk model='action' %}?next={{ request.get_full_path|urlencode }}">Delete</a>
             </div>
         </div>
         {% endfor %}
