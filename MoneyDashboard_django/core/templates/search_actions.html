@@ -32,14 +32,14 @@
         <p class="block-title">No results</p>
         {% endif %}
         <div class="actions">
-            <a class="button_round" href="{% url 'home' %}">Back</a>
+            <a class="button_round" href="{% url button_url b_u2 %}">{{ button_title }}</a>
         </div>
     </div>
     <hr>
     <div class="container">
         {% for action in page_obj %}
         <div class="card">
-            <a class="name" href="{% url 'update-action' pk=action.pk %}?next={{ request.get_full_path|urlencode }}">({{ action.category }}) {{ action.title }}</a>
+            <a class="name" href="{% url 'update-action' wallet.pk action.pk %}?next={{ request.get_full_path|urlencode }}">({{ action.category }}) {{ action.title }}</a>
             <div class="list">
                 {% if action.action_type == 'increase' %}
                 <p class="money increase">{{ action.money }} <span>BYN</span></p>
@@ -79,7 +79,7 @@
     </div>
     <hr>
     <div class="container">
-        <a class="button_round" href="{% url 'download' %}?from={{ request.GET.from }}&to={{ request.GET.to }}&category={{ request.GET.category }}">Download searched actions as JSON</a>
+        <a class="button_round" href="{% url 'download' wallet.pk %}?from={{ request.GET.from }}&to={{ request.GET.to }}&category={{ request.GET.category }}">Download searched actions as JSON</a>
     </div>
     {% endif %}
 {% endblock %}

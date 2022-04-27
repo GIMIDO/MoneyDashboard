@@ -1,0 +1,106 @@
+{% extends 'home.html' %}
+
+{% block content %}
+<div class="container">
+    <p class="message">Total amount: {{ total_amount }} {{ wallet.currency.title }}</p>
+    {% if messages %}
+    {% for message in messages %}
+    <span class="message message_{{ message.tags }}">{{ message }}</span>
+    {% endfor %}
+    {% endif %}
+</div>
+
+<div class="title_name_block">
+        {% if page_obj %}
+        <p class="block-title">All actions</p>
+        {% else %}
+        <p class="block-title">No actions</p>
+        {% endif %}
+        <div class="actions">
+            <a class="button_round" href="{% url 'create-action' wallet.pk %}?next={{ request.path }}">Create&nbspAction</a>
+            <a class="button_round" href="{% url 'create-category' wallet.pk %}?next={{ request.path }}">Create&nbspCategory</a>
+            <a class="button_round" href="{% url 'home' %}">Home</a>
+        </div>
+    </div>
+    <hr>
+    <div class="container">
+        {% for action in page_obj %}
+        <div class="card">
+            <a class="name" href="{% url 'update-action' wallet.pk action.pk %}?next={{ request.path }}">({{ action.category.title }}) {{ action.title }}</a>
+            <div class="list">
+                {% if action.action_type == 'increase' %}
+                <p class="money increase">{{ action.money }} <span>{{ action.wallet.currency.title }}</span></p>
+                {% else %}
+                <p class="money spending">{{ action.money }} <span>{{ action.wallet.currency.title }}</span></p>
+                {% endif %}
+                <p class="date">{{ action.date }}</p>
+                <a class="button_round delete" href="{% url 'delete-action' pk=action.pk model='action' %}?next={{ request.path }}">Delete</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="container">
+        {% if page_obj.has_other_pages %}
+        <span class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page=1" class="button_round">First</a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="button_round">&laquo;</a>
+            {% endif %}
+            <span>
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="button_round">&raquo;</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="button_round">Last</a>
+            {% endif %}
+        </span>
+        {% endif %}
+    </div>
+    
+    {% if page_obj %}
+    <div class="title_name_block">
+        <p class="block-title">Search</p>
+        <div class="actions">
+            <form class="search_form" action="{% url 'search-results' wallet.pk %}?next={{ request.path }}" method="get">
+                <p class="search_p">category</p>
+                <select class="long_select" name="category" type="text">
+                    <option></option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.title }}</option>
+                    {% endfor %}
+                </select>
+                <p class="search_p">from</p>
+                <input name="from" type="date" placeholder="Date from...">
+                <p class="search_p">to</p>
+                <input name="to" type="date" placeholder="Date to...">
+                <input id="button_round" type="submit" value="Search">
+            </form>
+        </div>
+    </div>
+    <hr>
+    {% endif %}
+
+    <div class="title_name_block">
+        <p class="block-title">Download actions</p>
+    </div>
+    <hr>
+    <div class="container">
+        <a class="button_round" href="{% url 'download' wallet.pk %}">Download all actions as JSON</a>
+    </div>
+
+    <div class="title_name_block">
+        <p class="block-title">Categories</p>
+    </div>
+    <hr>
+    <div class="container">
+        {% for category in categories %}
+        <div class="card">
+            <a class="name" href="{% url 'update-category' wallet.pk category.pk %}?next={{ request.get_full_path|urlencode }}">Title: {{ category.title }} / {{ category.user.username }}</a>
+            <div class="list">
+                <a class="button_round delete" href="{% url 'delete-action' pk=category.pk model='category' %}?next={{ request.get_full_path|urlencode }}">Delete</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endblock content %}

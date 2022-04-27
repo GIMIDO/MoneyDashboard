@@ -1,3 +1,4 @@
+from locale import currency
 from django.shortcuts import render, redirect
 from django.views.generic import View
 from django.http import HttpResponseRedirect, HttpResponse
@@ -14,114 +15,42 @@ class HomePage(View):
 
     def get(self, request):
         if request.user.is_authenticated:
-            actions = Action.objects.filter(user=request.user).order_by('-date', '-created_at')
-
-            categories = Category.objects.filter(user=request.user)
             wallets = Wallet.objects.filter(user=request.user)
             currencies = Currency.objects.filter(user=request.user)
 
-            paginator = Paginator(actions, 10)
-            page_number = request.GET.get('page')
-            page_obj = paginator.get_page(page_number)
             context = {
-                'total_amount': calc_amount(actions),
-                'page_obj': page_obj,
-                'categories':categories,
                 'wallets': wallets,
                 'currencies': currencies
-                }
+            }
             return render(request, 'home.html', context)
         else:
             return HttpResponseRedirect('sign-in/')
 
 
-class CreateAction(View):
-
-    def get(self, request):
-        form = ActionForm(request.user, request.POST or None)
-        context = {'form': form,
-                   'button_url':'home',
-                   'page_title':'Create action',
-                   'button_title':'Home'}
-        return render(request, 'page_manager.html', context)
-
-    def post(self, request):
-        form = ActionForm(request.user, request.POST or None)
-        if form.is_valid():
-            Action.objects.create(
-                user=request.user,
-                category=form.cleaned_data['category'],
-                wallet=form.cleaned_data['wallet'],
-                title=form.cleaned_data['title'],
-                money=form.cleaned_data['money'],
-                date=form.cleaned_data['date'],
-                action_type=form.cleaned_data['action_type']
-            )
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 "Added action: {}"
-                                 .format(form.cleaned_data['title']))
-            return HttpResponseRedirect('/')
-        context = {'form': form,
-                   'button_url':'home',
-                   'page_title':'Create action',
-                   'button_title':'Home'}
-        return render(request, 'page_manager.html', context)
-
-
-class DeleteAction(View):
-
-    MODEL_CHOISE = {
-        'category': Category,
-        'action': Action,
-        'wallet': Wallet,
-        'currency': Currency
-    }
+class WalletView(View):
 
     def get(self, request, **kwargs):
-        messages.add_message(request,
-                             messages.WARNING,
-                             "Deleted action!")
-        self.MODEL_CHOISE[kwargs['model']].objects.get(pk=(kwargs.get('pk')),
-                                                       user=request.user).delete()
-        return redirect(request.GET.get('next'))
+        if request.user.is_authenticated:
+            actions = Action.objects.filter(user=request.user,
+                                            wallet=(kwargs.get('pk'))).order_by('-date', '-created_at')
+            categories = Category.objects.filter(user=request.user,
+                                                 wallet=(kwargs.get('pk')))
+            wallet = Wallet.objects.get(user=request.user,
+                                        pk=(kwargs.get('pk')))
 
+            paginator = Paginator(actions, 10)
+            page_number = request.GET.get('page')
+            page_obj = paginator.get_page(page_number)
 
-class UpdateAction(View):
-
-    def get(self, request, **kwargs):
-        action = Action.objects.get(user=request.user,
-                                    pk=(kwargs.get('pk')))
-        form = ActionForm(request.user,
-                          request.POST or None,
-                          instance=action)
-        context = {'form': form,
-                   'button_url':'home',
-                   'page_title':'Update action',
-                   'button_title':'Home'}
-        return render(request, 'page_manager.html', context)
-
-    def post(self, request, **kwargs):
-        action = Action.objects.get(user=request.user,
-                                    pk=(kwargs.get('pk')))
-        form = ActionForm(request.user,
-                          request.POST,
-                          instance=action)
-        if form.is_valid():
-            form.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 "Updated action: {}"
-                                 .format(form.cleaned_data['title']))
-            next = request.GET.get('next')
-            return HttpResponseRedirect(next)
+            context = {
+                'wallet': wallet,
+                'total_amount': calc_amount(actions, wallet.start_amount),
+                'page_obj': page_obj,
+                'categories':categories
+                }
+            return render(request, 'wallet.html', context)
         else:
-            form = ActionForm(instance=action)
-        context = {'form': form,
-                   'button_url':'home',
-                   'page_title':'Update action',
-                   'button_title':'Home'}
-        return render(request, 'page_manager.html', context)
+            return HttpResponseRedirect('sign-in/')
 
 
 class LoginView(View):
@@ -149,7 +78,6 @@ class LoginView(View):
                    'page_title':'Sign In',
                    'button_title':'Sign Up'}
         return render(request, 'page_manager.html', context)
-
 
 class RegistrationView(View):
 
@@ -185,12 +113,16 @@ class RegistrationView(View):
 
 class SearchResultsView(View):
 
-    def get(self, request):
+    def get(self, request, **kwargs):
+        wallet_pk = kwargs.get('pk')
+        wallet = Wallet.objects.get(user=request.user,
+                                    pk=wallet_pk)
+
         q_from = self.request.GET.get("from")
         q_to = self.request.GET.get("to")
         q_category = self.request.GET.get("category")
         q_user = request.user
-        actions = search_actions(q_from, q_to, q_category, q_user)
+        actions = search_actions(wallet_pk, q_from, q_to, q_category, q_user)
 
         if q_category:
             category_out = Category.objects.get(id=q_category)
@@ -206,7 +138,11 @@ class SearchResultsView(View):
             'q_to': q_to,
             'q_category': q_category,
             'category_out': category_out,
-            'total_amount': calc_amount(actions),
+            'button_url': 'wallet-page',
+            'b_u2': wallet_pk,
+            'button_title': 'Back',
+            'wallet': wallet,
+            'total_amount': calc_amount(actions, 0),
             'page_obj': page_obj
         }
         return render(request, 'search_actions.html', context)
@@ -214,16 +150,18 @@ class SearchResultsView(View):
 
 class DownloadJSON(View):
 
-    def get(self, request):
+    def get(self, request, **kwargs):
+        q_wallet = kwargs.get('pk')
         q_from = request.GET.get('from')
         q_to = request.GET.get('to')
         q_category = request.GET.get("category")
         q_user = request.user
-        actions = search_actions(q_from, q_to, q_category, q_user)
+        actions = search_actions(q_wallet, q_from, q_to, q_category, q_user)
         json_str = serializers.serialize('json',
                                          actions,
                                          fields=('title',
                                                  'category',
+                                                 'wallet',
                                                  'money',
                                                  'action_type',
                                                  'date'))
@@ -233,47 +171,146 @@ class DownloadJSON(View):
         return response
 
 
-class CreateCategory(View):
+class CreateAction(View):
 
-    def get(self, request):
-        form = CategoryForm(request.POST or None)
+    def get(self, request, **kwargs):
+        wallet_pk = kwargs.get('pk')
+        form = ActionForm(request.user,
+                          wallet_pk,
+                          request.POST or None)
+        next = request.GET.get('next')
         context = {'form': form,
-                   'button_url':'home',
-                   'page_title':'Create category',
-                   'button_title':'Home'}
+                   'go_next': next,
+                   'page_title':'Create action',
+                   'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
-    def post(self, request):
+    def post(self, request, **kwargs):
+        wallet_pk = kwargs.get('pk')
+        form = ActionForm(request.user,
+                          wallet_pk,
+                          request.POST or None)
+        if form.is_valid():
+            Action.objects.create(
+                user=request.user,
+                category=form.cleaned_data['category'],
+                wallet=Wallet.objects.get(user=request.user,
+                                          pk=wallet_pk),
+                title=form.cleaned_data['title'],
+                money=form.cleaned_data['money'],
+                date=form.cleaned_data['date'],
+                action_type=form.cleaned_data['action_type']
+            )
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 "Added action: {}"
+                                 .format(form.cleaned_data['title']))
+            next = request.GET.get('next')
+            return HttpResponseRedirect(next)
+        context = {'form': form,
+                   'go_next': next,
+                   'page_title':'Create action',
+                   'button_title':'Back'}
+        return render(request, 'page_manager.html', context)
+
+class UpdateAction(View):
+
+    def get(self, request, **kwargs):
+        wallet_pk = kwargs.get('wallet_pk')
+        action = Action.objects.get(user=request.user,
+                                    pk=(kwargs.get('action_pk')))
+
+        next = request.GET.get('next')
+
+        form = ActionForm(request.user,
+                          wallet_pk,
+                          request.POST or None,
+                          instance=action)
+        context = {'form': form,
+
+                   'go_next': next,
+
+                   'page_title':'Update action',
+                   'button_title':'Back'}
+        return render(request, 'page_manager.html', context)
+
+    def post(self, request, **kwargs):
+        wallet_pk = kwargs.get('wallet_pk')
+        action = Action.objects.get(user=request.user,
+                                    pk=(kwargs.get('action_pk')))
+
+        form = ActionForm(request.user,
+                          wallet_pk,
+                          request.POST,
+                          instance=action)
+
+        if form.is_valid():
+            form.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 "Updated action: {}"
+                                 .format(form.cleaned_data['title']))
+                                 
+            next = request.GET.get('next')
+            return HttpResponseRedirect(next)
+        else:
+            form = ActionForm(instance=action)
+        context = {'form': form,
+                   'go_next': next,
+                   'page_title':'Update action',
+                   'button_title':'Back'}
+        return render(request, 'page_manager.html', context)
+
+
+class CreateCategory(View):
+
+    def get(self, request, **kwargs):
+        next = request.GET.get('next')
+        form = CategoryForm(request.POST or None)
+        context = {'form': form,
+                   'go_next': next,
+                   'page_title':'Create category',
+                   'button_title':'Back'}
+        return render(request, 'page_manager.html', context)
+
+    def post(self, request, **kwargs):
+        wallet_pk = kwargs.get('pk')
+        next = request.GET.get('next')
         form = CategoryForm(request.POST or None)
         if form.is_valid():
             Category.objects.create(user=request.user,
-                                    title=form.cleaned_data['title'])
+                                    title=form.cleaned_data['title'],
+                                    wallet=Wallet.objects.get(user=request.user,
+                                                              pk=wallet_pk))
             messages.add_message(request,
                                  messages.SUCCESS,
                                  "Added category: {}!"
                                  .format(form.cleaned_data['title']))
-            return HttpResponseRedirect('/')
+            return HttpResponseRedirect(next)
         context = {'form': form,
-                   'button_url':'home',
+                   'go_next': next,
                    'page_title':'Create category', 
-                   'button_title':'Home'}
+                   'button_title':'Back'}
         return render(request, 'page_manager.html', context)
-
 
 class UpdateCategory(View):
 
     def get(self, request, **kwargs):
+        next = request.GET.get('next')
         category = Category.objects.get(user=request.user,
                                         pk=(kwargs.get('pk')))
         form = CategoryForm(request.POST or None,
                             instance=category)
         context = {'form': form,
-                   'button_url':'home',
+
+                   'go_next': next,
                    'page_title':'Update category',
-                   'button_title':'Home'}
+                   'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
     def post(self, request, **kwargs):
+        next = request.GET.get('next')
+
         category = Category.objects.get(user=request.user,
                                         pk=(kwargs.get('pk')))
         form = CategoryForm(request.POST or None,
@@ -284,28 +321,31 @@ class UpdateCategory(View):
                                  messages.SUCCESS,
                                  "Updated category: {}"
                                  .format(form.cleaned_data['title']))
-            next = request.GET.get('next')
             return HttpResponseRedirect(next)
         else:
             form = CategoryForm(instance=category)
         context = {'form': form,
-                   'button_url':'home',
+
+                   'go_next': next,
                    'page_title':'Update category',
-                   'button_title':'Home'}
+                   'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
 
 class CreateWallet(View):
 
     def get(self, request):
-        form = WalletForm(request.user, request.POST or None)
+        next = request.GET.get('next')
+        form = WalletForm(request.user,
+                          request.POST or None)
         context = {'form': form,
-                   'button_url':'home',
+                   'go_next': next,
                    'page_title':'Create wallet',
-                   'button_title':'Home'}
+                   'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
     def post(self, request):
+        next = request.GET.get('next')
         form = WalletForm(request.user, request.POST or None)
         if form.is_valid():
             Wallet.objects.create(user=request.user,
@@ -319,27 +359,29 @@ class CreateWallet(View):
                                  .format(form.cleaned_data['title']))
             return HttpResponseRedirect('/')
         context = {'form': form,
-                   'button_url':'home',
+                   'go_next': next,
                    'page_title':'Create wallet', 
-                   'button_title':'Home'}
+                   'button_title':'Back'}
         return render(request, 'page_manager.html', context)
-
 
 class UpdateWallet(View):
 
     def get(self, request, **kwargs):
+        next = request.GET.get('next')
         wallet = Wallet.objects.get(user=request.user,
                                     pk=(kwargs.get('pk')))
         form = WalletForm(request.user,
                           request.POST or None,
                           instance=wallet)
         context = {'form': form,
-                   'button_url':'home',
+
+                   'go_next': next,
                    'page_title':'Update wallet',
-                   'button_title':'Home'}
+                   'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
     def post(self, request, **kwargs):
+        next = request.GET.get('next')
         wallet = Wallet.objects.get(user=request.user,
                                     pk=(kwargs.get('pk')))
         form = WalletForm(request.user,
@@ -356,23 +398,26 @@ class UpdateWallet(View):
         else:
             form = CategoryForm(instance=wallet)
         context = {'form': form,
-                   'button_url':'home',
+
+                   'go_next': next,
                    'page_title':'Update wallet',
-                   'button_title':'Home'}
+                   'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
 
 class CreateCurrency(View):
 
     def get(self, request):
+        next = request.GET.get('next')
         form = CurrencyForm(request.POST or None)
         context = {'form': form,
-                   'button_url':'home',
+                   'go_next': next,
                    'page_title':'Create currency',
-                   'button_title':'Home'}
+                   'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
     def post(self, request):
+        next = request.GET.get('next')
         form = CurrencyForm(request.POST or None)
         if form.is_valid():
             Currency.objects.create(user=request.user,
@@ -386,26 +431,27 @@ class CreateCurrency(View):
                                          form.cleaned_data['coef']))
             return HttpResponseRedirect('/')
         context = {'form': form,
-                   'button_url':'home',
+                   'go_next': next,
                    'page_title':'Create currency', 
-                   'button_title':'Home'}
+                   'button_title':'Back'}
         return render(request, 'page_manager.html', context)
-
 
 class UpdateCurrency(View):
     
     def get(self, request, **kwargs):
+        next = request.GET.get('next')
         currency = Currency.objects.get(user=request.user,
                                     pk=(kwargs.get('pk')))
         form = CurrencyForm(request.POST or None,
                             instance=currency)
         context = {'form': form,
-                   'button_url':'home',
+                   'go_next': next,
                    'page_title':'Update currency',
-                   'button_title':'Home'}
+                   'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
     def post(self, request, **kwargs):
+        next = request.GET.get('next')
         currency = Currency.objects.get(user=request.user,
                                     pk=(kwargs.get('pk')))
         form = CurrencyForm(request.POST or None,
@@ -421,7 +467,25 @@ class UpdateCurrency(View):
         else:
             form = CurrencyForm(instance=currency)
         context = {'form': form,
-                   'button_url':'home',
+                   'go_next': next,
                    'page_title':'Update currency',
-                   'button_title':'Home'}
+                   'button_title':'Back'}
         return render(request, 'page_manager.html', context)
+
+
+class DeleteModelView(View):
+
+    MODEL_CHOISE = {
+        'category': Category,
+        'action': Action,
+        'wallet': Wallet,
+        'currency': Currency
+    }
+
+    def get(self, request, **kwargs):
+        messages.add_message(request,
+                             messages.WARNING,
+                             "Deleted action!")
+        self.MODEL_CHOISE[kwargs['model']].objects.get(pk=(kwargs.get('pk')),
+                                                       user=request.user).delete()
+        return redirect(request.GET.get('next'))

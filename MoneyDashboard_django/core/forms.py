@@ -60,16 +60,15 @@ class ActionForm(forms.ModelForm):
 
     class Meta:
         model = Action
-        fields = ['title','category','wallet','money','date','action_type']
+        fields = ['title','category','money','date','action_type']
         widgets = {
             'date': DateInput()
         }
 
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, user, wallet_pk, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['title'].label = 'Title'
-        self.fields['category'].queryset = Category.objects.filter(user=user)
-        self.fields['wallet'].queryset = Wallet.objects.filter(user=user)
+        self.fields['category'].queryset = Category.objects.filter(user=user, wallet=wallet_pk)
 
 
 class CategoryForm(forms.ModelForm):

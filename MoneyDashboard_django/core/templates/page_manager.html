@@ -3,9 +3,9 @@
 {% block content %}
     <div class="title_name_block">
         <p class="block-title">{{ page_title }}</p>
-        <div class="actions">
-            {% if button_url %}
-            <a class="button_round" href="{% url button_url %}">{{ button_title }}</a>
+        <div class="actions">            
+            {% if go_next %}
+            <a class="button_round" href="{{ go_next }}">{{ button_title }}</a>
             {% endif %}
         </div>
     </div>

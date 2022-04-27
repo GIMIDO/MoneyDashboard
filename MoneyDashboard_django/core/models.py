@@ -6,21 +6,6 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-class Category(models.Model):
-
-    title = models.CharField(
-        verbose_name='Category',
-        max_length=255)
-        
-    user = models.ForeignKey(
-        User,
-        verbose_name='User',
-        on_delete=models.CASCADE)
-
-    def __str__(self) -> str:
-        return f'{self.title}'
-
-
 class Currency(models.Model):
 
     user = models.ForeignKey(
@@ -65,6 +50,26 @@ class Wallet(models.Model):
     def __str__(self) -> str:
         return f'{self.title} {self.currency}'
 
+
+class Category(models.Model):
+
+    title = models.CharField(
+        verbose_name='Category',
+        max_length=255)
+        
+    user = models.ForeignKey(
+        User,
+        verbose_name='User',
+        on_delete=models.CASCADE)
+        
+    wallet = models.ForeignKey(
+        Wallet,
+        verbose_name='Wallet',
+        on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return f'{self.title}'
+        
 
 class Action(models.Model):
 
