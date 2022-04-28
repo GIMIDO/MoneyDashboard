@@ -50,7 +50,7 @@ class WalletView(View):
                 }
             return render(request, 'wallet.html', context)
         else:
-            return HttpResponseRedirect('sign-in/')
+            return HttpResponseRedirect('sign-in')
 
 
 class LoginView(View):
@@ -58,7 +58,7 @@ class LoginView(View):
     def get(self, request):
         form = LoginForm(request.POST or None)
         context = {'form': form,
-                   'button_url':'sign-up',
+                   'auth_check': 1,
                    'page_title':'Sign In', 
                    'button_title':'Sign Up'}
         return render(request, 'page_manager.html', context)
@@ -74,7 +74,7 @@ class LoginView(View):
                 login(request, user)
                 return HttpResponseRedirect('/')
         context = {'form': form,
-                   'button_url':'sign-up',
+                   'auth_check': 1,
                    'page_title':'Sign In',
                    'button_title':'Sign Up'}
         return render(request, 'page_manager.html', context)
@@ -84,8 +84,8 @@ class RegistrationView(View):
     def get(self, request):
         form = RegistrationForm(request.POST or None)
         context = {'form': form,
-                   'button_url':'sign-in',
-                   'page_title':'Sign Un',
+                   'auth_check': 2,
+                   'page_title':'Sign Up',
                    'button_title':'Sign In'}
         return render(request, 'page_manager.html', context)
 
@@ -105,8 +105,8 @@ class RegistrationView(View):
                                  "Registation completed!")
             return HttpResponseRedirect('/')
         context = {'form': form,
-                   'button_url':'sign-in',
-                   'page_title':'Sign Un',
+                   'auth_check': 2,
+                   'page_title':'Sign Up',
                    'button_title':'Sign In'}
         return render(request, 'page_manager.html', context)
 

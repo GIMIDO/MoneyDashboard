@@ -113,7 +113,7 @@ celerybeat.pid
 
 # Environments
 .env
-.venv
+.venv_django
 env/
 venv/
 ENV/

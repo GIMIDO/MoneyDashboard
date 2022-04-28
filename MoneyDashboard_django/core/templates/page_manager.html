@@ -7,6 +7,13 @@
             {% if go_next %}
             <a class="button_round" href="{{ go_next }}">{{ button_title }}</a>
             {% endif %}
+            {% if auth_check%}
+            {% if auth_check == 1 %}
+            <a class="button_round" href="{% url 'sign-up' %}">{{ button_title }}</a>
+            {% else %}
+            <a class="button_round" href="{% url 'sign-in' %}">{{ button_title }}</a>
+            {% endif %}
+            {% endif %}
         </div>
     </div>
     <hr>
