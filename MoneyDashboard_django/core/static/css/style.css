@@ -294,3 +294,7 @@ span.helptext {
 .pagination {
     margin: 0 auto;
 }
+span.owner_title, .name > span {
+    color:rgb(255, 65, 65);
+    font-size: 14px;
+}

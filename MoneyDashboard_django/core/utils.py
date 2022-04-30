@@ -1,7 +1,7 @@
 from .models import *
 from django.db.models import Q
 
-def calc_amount_wallet_create(a_type, action, pk):
+def calc_amount_wallet(a_type, action, pk):
     w_amount = Wallet.objects.get(pk=pk)
     match(a_type):
         case 'create':
@@ -47,9 +47,9 @@ def calc_amount(actions):
 
 def search_actions(wallet_pk, q_from, q_to, q_category, q_user):
     if q_category:
-        actions_all = Action.objects.filter(user=q_user, category=q_category, wallet=wallet_pk)
+        actions_all = Action.objects.filter(category=q_category, wallet=wallet_pk)
     else:
-        actions_all = Action.objects.filter(user=q_user, wallet=wallet_pk)
+        actions_all = Action.objects.filter(wallet=wallet_pk)
 
     if q_from:
         if q_to:    

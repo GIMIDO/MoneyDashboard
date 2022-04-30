@@ -2,6 +2,7 @@
 
 {% block content %}
 <div class="container">
+    <p class="message">Wallet owner: {{ wallet.user.username }}</p>
     <p class="message">Total amount: {{ total_amount }} {{ wallet.currency.title }}</p>
     {% if messages %}
     {% for message in messages %}
@@ -19,9 +20,9 @@
         <div class="actions">
             {% if wallet.user == request.user %}
                 <a class="button_round" href="{% url 'wallet-access' wallet.pk %}">Access</a>
+                <a class="button_round" href="{% url 'create-action' wallet.pk %}?next={{ request.path }}">Create&nbspAction</a>
+                <a class="button_round" href="{% url 'create-category' wallet.pk %}?next={{ request.path }}">Create&nbspCategory</a>
             {% endif %}
-            <a class="button_round" href="{% url 'create-action' wallet.pk %}?next={{ request.path }}">Create&nbspAction</a>
-            <a class="button_round" href="{% url 'create-category' wallet.pk %}?next={{ request.path }}">Create&nbspCategory</a>
             <a class="button_round" href="{% url 'home' %}">Home</a>
         </div>
     </div>
@@ -29,7 +30,11 @@
     <div class="container">
         {% for action in page_obj %}
         <div class="card">
+            {% if wallet.user == request.user %}
             <a class="name" href="{% url 'update-action' wallet.pk action.pk %}?next={{ request.path }}">({{ action.category.title }}) {{ action.title }}</a>
+            {% else %}
+            <p class="name">({{ action.category.title }}) {{ action.title }}</p>
+            {% endif %}
             <div class="list">
                 {% if action.action_type == 'increase' %}
                 <p class="money increase">{{ action.money }} <span>{{ action.wallet.currency.title }}</span></p>
@@ -37,7 +42,9 @@
                 <p class="money spending">{{ action.money }} <span>{{ action.wallet.currency.title }}</span></p>
                 {% endif %}
                 <p class="date">{{ action.date }}</p>
+                {% if wallet.user == request.user %}
                 <a class="button_round delete" href="{% url 'delete-action' pk=action.pk model='action' %}?next={{ request.path }}">Delete</a>
+                {% endif %}
             </div>
         </div>
         {% endfor %}
@@ -99,9 +106,15 @@
     <div class="container">
         {% for category in categories %}
         <div class="card">
-            <a class="name" href="{% url 'update-category' wallet.pk category.pk %}?next={{ request.get_full_path|urlencode }}">Title: {{ category.title }} / {{ category.user.username }}</a>
+            {% if wallet.user == request.user %}
+            <a class="name" href="{% url 'update-category' wallet.pk category.pk %}?next={{ request.get_full_path|urlencode }}">{{ category.title }}</a>
+            {% else %}
+            <p class="name">{{ category.title }}</p>
+            {% endif %}
             <div class="list">
+            {% if wallet.user == request.user %}
                 <a class="button_round delete" href="{% url 'delete-action' pk=category.pk model='category' %}?next={{ request.get_full_path|urlencode }}">Delete</a>
+            {% endif %}
             </div>
         </div>
         {% endfor %}

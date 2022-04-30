@@ -38,7 +38,7 @@
     <div class="container">
         {% for currency in currencies %}
         <div class="card">
-            <a class="name" href="{% url 'update-currency' currency.pk %}?next={{ request.get_full_path|urlencode }}">Currency: {{ currency.title }} / Coef: {{ currency.coef }} / {{ currency.user.username }}</a>
+            <a class="name" href="{% url 'update-currency' currency.pk %}?next={{ request.get_full_path|urlencode }}">{{ currency.title }} [{{ currency.coef }}]</a>
             <div class="list">
                 <a class="button_round delete" href="{% url 'delete-action' pk=currency.pk model='currency' %}?next={{ request.get_full_path|urlencode }}">Delete</a>
             </div>
@@ -47,7 +47,7 @@
     </div>
 
     <div class="title_name_block">
-        <p class="block-title">Wallets</p>
+        <p class="block-title">Your wallets</p>
         <div class="actions">
             <a class="button_round" href="{% url 'create-wallet' %}?next={{ request.path }}">Create&nbspWallet</a>
         </div>
@@ -56,9 +56,9 @@
     <div class="container">
         {% for wallet in wallets %}
         <div class="card">
-            <a class="name" href="{% url 'wallet-page' pk=wallet.pk %}">Wallet: {{ wallet.title }} / Curr: {{ wallet.currency }} / Amount: {{ wallet.start_amount }} / {{ wallet.user.username }}</a>
+            <a class="name" href="{% url 'wallet-page' wallet_pk=wallet.pk %}">{{ wallet.title }} [{{ wallet.start_amount }} {{ wallet.currency.title }}]</a>
             <div class="list">
-                <a class="button_round" href="{% url 'update-wallet' pk=wallet.pk %}?next={{ request.path }}">Update</a>
+                <a class="button_round" href="{% url 'update-wallet' wallet_pk=wallet.pk %}?next={{ request.path }}">Update</a>
                 <a class="button_round delete" href="{% url 'delete-action' pk=wallet.pk model='wallet' %}?next={{ request.path }}">Delete</a>
             </div>
         </div>
@@ -73,7 +73,7 @@
     <div class="container">
         {% for f_wallet in f_wallets %}
         <div class="card">
-            <a class="name" href="{% url 'wallet-page' pk=f_wallet.wallet.pk %}">Wallet: {{ f_wallet.wallet.title }} / Curr: {{ f_wallet.wallet.currency }} / Amount: {{ f_wallet.wallet.start_amount }} / {{ f_wallet.wallet.user.username }}</a>
+            <a class="name" href="{% url 'wallet-page' wallet_pk=f_wallet.wallet.pk %}"><span class="owner_title">{{ f_wallet.wallet.user.username }} </span> {{ f_wallet.wallet.title }} [{{ f_wallet.wallet.start_amount }} {{ f_wallet.wallet.currency.title }}]</a>
         </div>
         {% endfor %}
     </div>
