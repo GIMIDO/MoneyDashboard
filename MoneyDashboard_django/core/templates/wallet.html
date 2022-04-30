@@ -17,6 +17,9 @@
         <p class="block-title">No actions</p>
         {% endif %}
         <div class="actions">
+            {% if wallet.user == request.user %}
+                <a class="button_round" href="{% url 'wallet-access' wallet.pk %}">Access</a>
+            {% endif %}
             <a class="button_round" href="{% url 'create-action' wallet.pk %}?next={{ request.path }}">Create&nbspAction</a>
             <a class="button_round" href="{% url 'create-category' wallet.pk %}?next={{ request.path }}">Create&nbspCategory</a>
             <a class="button_round" href="{% url 'home' %}">Home</a>

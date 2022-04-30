@@ -1,3 +1,5 @@
+from operator import mod
+from tkinter import CASCADE
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth import get_user_model
@@ -17,9 +19,7 @@ class Currency(models.Model):
         verbose_name='Currency',
         max_length=255)
 
-    coef = models.DecimalField(
-        max_digits=9,
-        decimal_places=2,
+    coef = models.FloatField(
         verbose_name='Coefficient'
     )
 
@@ -42,9 +42,7 @@ class Wallet(models.Model):
         verbose_name='Wallet',
         max_length=255)
 
-    start_amount = models.DecimalField(
-        max_digits=9,
-        decimal_places=2,
+    start_amount = models.FloatField(
         verbose_name='Start amount')
 
     def __str__(self) -> str:
@@ -100,9 +98,7 @@ class Action(models.Model):
         max_length=255,
         verbose_name='Name')
 
-    money = models.DecimalField(
-        max_digits=9,
-        decimal_places=2,
+    money = models.FloatField(
         verbose_name='Price')
 
     date = models.DateField(
@@ -123,3 +119,8 @@ class Action(models.Model):
                  ({self.category}) \
                  {self.money} \
                  [{self.user.username}]'
+
+
+class FamilyAccess(models.Model):
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)

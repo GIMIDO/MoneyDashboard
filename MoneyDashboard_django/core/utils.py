@@ -1,8 +1,42 @@
 from .models import *
 from django.db.models import Q
 
-def calc_amount(actions, start_amount):
-    total_amount = start_amount
+def calc_amount_wallet_create(a_type, action, pk):
+    w_amount = Wallet.objects.get(pk=pk)
+    match(a_type):
+        case 'create':
+            if action.action_type == "increase":
+                w_amount.start_amount += float(action.money)
+            else:
+                w_amount.start_amount -= float(action.money)
+        case 'delete':
+            if action.action_type == "increase":
+                w_amount.start_amount -= float(action.money)
+            else:
+                w_amount.start_amount += float(action.money)
+    w_amount.save()
+
+def calc_amount_wallet_update(action, pk, old_action):
+    print(action)
+    print(old_action)
+    w_amount = Wallet.objects.get(pk=pk)
+    if old_action.action_type == 'increase':
+        w_amount.start_amount -= float(old_action.money)
+        if action.action_type == 'increase': 
+            w_amount.start_amount += float(action.money)
+        else:
+            w_amount.start_amount -= float(action.money)
+    else:
+        w_amount.start_amount += float(old_action.money)
+        if action.action_type == 'increase': 
+            w_amount.start_amount += float(action.money)
+        else:
+            w_amount.start_amount -= float(action.money)
+    w_amount.save()
+
+
+def calc_amount(actions):
+    total_amount = 0
     for action in actions:
         if action.action_type == "increase":
             total_amount = total_amount + action.money

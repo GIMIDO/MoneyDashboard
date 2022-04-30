@@ -25,4 +25,10 @@ urlpatterns = [
     path('sign-up/', RegistrationView.as_view(), name='sign-up'),
 
     path('wallet/<int:pk>/search/', SearchResultsView.as_view(), name='search-results'),
+    
+    path('wallet/<int:pk>/access/', FamilyAccessView.as_view(), name='wallet-access'),
+    path('wallet/access/<int:pk>/<str:user>/delete/', DeleteAccessView.as_view(), name='delete-access'),
+    path('wallet/access/<int:pk>/add/', AddAccessView.as_view(), name='add-access'),
+
+
 ]

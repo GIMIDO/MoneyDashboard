@@ -1,4 +1,3 @@
-from locale import currency
 from django.shortcuts import render, redirect
 from django.views.generic import View
 from django.http import HttpResponseRedirect, HttpResponse
@@ -6,51 +5,64 @@ from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.core import serializers
+from django.core.exceptions import ObjectDoesNotExist
 from .models import *
 from .forms import *
 from .utils import *
+from .mixins import *
 
 
-class HomePage(View):
+class HomePage(AuthenticatedUserMixin, View):
 
     def get(self, request):
-        if request.user.is_authenticated:
-            wallets = Wallet.objects.filter(user=request.user)
-            currencies = Currency.objects.filter(user=request.user)
+        wallets = Wallet.objects.filter(user=request.user)
+        currencies = Currency.objects.filter(user=request.user)
+        f_wallets = FamilyAccess.objects.filter(user=request.user)
+        print(f_wallets)
+        print(wallets)
+        context = {
+            'wallets': wallets,
+            'currencies': currencies,
+            'f_wallets': f_wallets  
+        }
 
-            context = {
-                'wallets': wallets,
-                'currencies': currencies
-            }
-            return render(request, 'home.html', context)
-        else:
-            return HttpResponseRedirect('sign-in/')
+        return render(request, 'home.html', context)
 
 
-class WalletView(View):
+class WalletView(AuthenticatedUserMixin, View):
 
     def get(self, request, **kwargs):
-        if request.user.is_authenticated:
-            actions = Action.objects.filter(user=request.user,
-                                            wallet=(kwargs.get('pk'))).order_by('-date', '-created_at')
-            categories = Category.objects.filter(user=request.user,
-                                                 wallet=(kwargs.get('pk')))
-            wallet = Wallet.objects.get(user=request.user,
-                                        pk=(kwargs.get('pk')))
-
-            paginator = Paginator(actions, 10)
-            page_number = request.GET.get('page')
-            page_obj = paginator.get_page(page_number)
-
-            context = {
-                'wallet': wallet,
-                'total_amount': calc_amount(actions, wallet.start_amount),
-                'page_obj': page_obj,
-                'categories':categories
-                }
-            return render(request, 'wallet.html', context)
+        # for Family Access
+        test_wallet = Wallet.objects.get(pk=(kwargs.get('pk')))
+        # Family Access
+        if FamilyAccess.objects.filter(user=request.user, wallet=test_wallet):
+            wallet = Wallet.objects.get(pk=(kwargs.get('pk')))
         else:
-            return HttpResponseRedirect('sign-in')
+            # for main user
+            try:
+                wallet = Wallet.objects.get(user=request.user, pk=(kwargs.get('pk')))
+            # for not main user :)
+            except ObjectDoesNotExist:
+                messages.add_message(request,
+                            messages.WARNING,
+                            "Wallet not exist!")
+                return HttpResponseRedirect('/')
+        
+        actions = Action.objects.filter(wallet=(kwargs.get('pk'))).order_by('-date', '-created_at')
+        categories = Category.objects.filter(wallet=(kwargs.get('pk')))
+
+        paginator = Paginator(actions, 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        context = {
+            'wallet': wallet,
+            'total_amount': wallet.start_amount,
+            'page_obj': page_obj,
+            'categories':categories
+            }
+            
+        return render(request, 'wallet.html', context)
 
 
 class LoginView(View):
@@ -111,7 +123,7 @@ class RegistrationView(View):
         return render(request, 'page_manager.html', context)
 
 
-class SearchResultsView(View):
+class SearchResultsView(AuthenticatedUserMixin, View):
 
     def get(self, request, **kwargs):
         wallet_pk = kwargs.get('pk')
@@ -142,13 +154,13 @@ class SearchResultsView(View):
             'b_u2': wallet_pk,
             'button_title': 'Back',
             'wallet': wallet,
-            'total_amount': calc_amount(actions, 0),
+            'total_amount': calc_amount(actions),
             'page_obj': page_obj
         }
         return render(request, 'search_actions.html', context)
 
 
-class DownloadJSON(View):
+class DownloadJSON(AuthenticatedUserMixin, View):
 
     def get(self, request, **kwargs):
         q_wallet = kwargs.get('pk')
@@ -167,11 +179,10 @@ class DownloadJSON(View):
                                                  'date'))
         response = HttpResponse(json_str, content_type='application/json')
         response['Content-Disposition'] = 'attachment; filename=actions.json'
-
         return response
 
 
-class CreateAction(View):
+class CreateAction(AuthenticatedUserMixin, View):
 
     def get(self, request, **kwargs):
         wallet_pk = kwargs.get('pk')
@@ -191,7 +202,7 @@ class CreateAction(View):
                           wallet_pk,
                           request.POST or None)
         if form.is_valid():
-            Action.objects.create(
+            action = Action.objects.create(
                 user=request.user,
                 category=form.cleaned_data['category'],
                 wallet=Wallet.objects.get(user=request.user,
@@ -201,6 +212,8 @@ class CreateAction(View):
                 date=form.cleaned_data['date'],
                 action_type=form.cleaned_data['action_type']
             )
+            action.save()
+            calc_amount_wallet_create('create',action, wallet_pk)
             messages.add_message(request,
                                  messages.SUCCESS,
                                  "Added action: {}"
@@ -213,23 +226,19 @@ class CreateAction(View):
                    'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
-class UpdateAction(View):
+class UpdateAction(AuthenticatedUserMixin, View):
 
     def get(self, request, **kwargs):
         wallet_pk = kwargs.get('wallet_pk')
         action = Action.objects.get(user=request.user,
                                     pk=(kwargs.get('action_pk')))
-
         next = request.GET.get('next')
-
         form = ActionForm(request.user,
                           wallet_pk,
                           request.POST or None,
                           instance=action)
         context = {'form': form,
-
                    'go_next': next,
-
                    'page_title':'Update action',
                    'button_title':'Back'}
         return render(request, 'page_manager.html', context)
@@ -238,19 +247,19 @@ class UpdateAction(View):
         wallet_pk = kwargs.get('wallet_pk')
         action = Action.objects.get(user=request.user,
                                     pk=(kwargs.get('action_pk')))
-
+        old_action = Action.objects.get(user=request.user,
+                                    pk=(kwargs.get('action_pk')))
         form = ActionForm(request.user,
                           wallet_pk,
                           request.POST,
                           instance=action)
-
         if form.is_valid():
             form.save()
+            calc_amount_wallet_update(action, wallet_pk, old_action)
             messages.add_message(request,
                                  messages.SUCCESS,
                                  "Updated action: {}"
-                                 .format(form.cleaned_data['title']))
-                                 
+                                 .format(form.cleaned_data['title']))          
             next = request.GET.get('next')
             return HttpResponseRedirect(next)
         else:
@@ -262,7 +271,7 @@ class UpdateAction(View):
         return render(request, 'page_manager.html', context)
 
 
-class CreateCategory(View):
+class CreateCategory(AuthenticatedUserMixin, View):
 
     def get(self, request, **kwargs):
         next = request.GET.get('next')
@@ -293,7 +302,7 @@ class CreateCategory(View):
                    'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
-class UpdateCategory(View):
+class UpdateCategory(AuthenticatedUserMixin, View):
 
     def get(self, request, **kwargs):
         next = request.GET.get('next')
@@ -332,7 +341,7 @@ class UpdateCategory(View):
         return render(request, 'page_manager.html', context)
 
 
-class CreateWallet(View):
+class CreateWallet(AuthenticatedUserMixin, View):
 
     def get(self, request):
         next = request.GET.get('next')
@@ -364,7 +373,7 @@ class CreateWallet(View):
                    'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
-class UpdateWallet(View):
+class UpdateWallet(AuthenticatedUserMixin, View):
 
     def get(self, request, **kwargs):
         next = request.GET.get('next')
@@ -405,7 +414,7 @@ class UpdateWallet(View):
         return render(request, 'page_manager.html', context)
 
 
-class CreateCurrency(View):
+class CreateCurrency(AuthenticatedUserMixin, View):
 
     def get(self, request):
         next = request.GET.get('next')
@@ -436,7 +445,7 @@ class CreateCurrency(View):
                    'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
-class UpdateCurrency(View):
+class UpdateCurrency(AuthenticatedUserMixin, View):
     
     def get(self, request, **kwargs):
         next = request.GET.get('next')
@@ -473,19 +482,98 @@ class UpdateCurrency(View):
         return render(request, 'page_manager.html', context)
 
 
-class DeleteModelView(View):
+class DeleteModelView(AuthenticatedUserMixin, View):
 
     MODEL_CHOISE = {
         'category': Category,
         'action': Action,
         'wallet': Wallet,
-        'currency': Currency
+        'currency': Currency,
+        'familyAccess': FamilyAccess
     }
 
     def get(self, request, **kwargs):
         messages.add_message(request,
                              messages.WARNING,
                              "Deleted action!")
-        self.MODEL_CHOISE[kwargs['model']].objects.get(pk=(kwargs.get('pk')),
-                                                       user=request.user).delete()
+
+        if (self.MODEL_CHOISE[kwargs['model']] == Action):
+            action = Action.objects.get(pk=(kwargs.get('pk')), user=request.user)
+            calc_amount_wallet_create('delete', action, action.wallet.pk)
+            action.delete()
+
+        else:
+            self.MODEL_CHOISE[kwargs['model']].objects.get(pk=(kwargs.get('pk')),
+                                                        user=request.user).delete()
         return redirect(request.GET.get('next'))
+
+
+class FamilyAccessView(AuthenticatedUserMixin, View):
+
+    def get(self, request, **kwargs):
+        # for main user
+        try:
+            wallet = Wallet.objects.get(user=request.user, pk=(kwargs.get('pk')))
+        # for not main user :)
+        except ObjectDoesNotExist:
+            messages.add_message(request,
+                        messages.WARNING,
+                        "Wallet not exist!")
+            return HttpResponseRedirect('/')
+
+        t_wallet = FamilyAccess.objects.filter(wallet=wallet)
+        next = request.GET.get('next')
+        context = {
+            'wallet_pk': wallet.pk,
+            't_wallet': t_wallet,
+            'go_next': next
+            }
+            
+        return render(request, 'wallet_access.html', context)
+
+
+class DeleteAccessView(AuthenticatedUserMixin, View):
+
+    def get(self, request, **kwargs):
+        instance = FamilyAccess.objects.get(
+            wallet=Wallet.objects.get(user=request.user, pk=kwargs.get('pk')),
+            user=User.objects.get(username=kwargs.get('user')))
+        messages.add_message(request,
+                             messages.WARNING,
+                             "Deleted user: {}!"
+                             .format(instance.user.username))
+        instance.delete()
+        return redirect(request.GET.get('next'))
+
+
+class AddAccessView(AuthenticatedUserMixin, View):
+
+    def get(self, request, **kwargs):
+        form = FamilyAccessForm(request.POST or None)
+        next = request.GET.get('next')
+        context = {'form': form,
+                   'go_next': next,
+                   'page_title': 'Add user',
+                   'button_title':'Back'}
+        return render(request, 'page_manager.html', context)
+
+    def post(self, request, **kwargs):
+        wallet_pk = kwargs.get('pk')
+        form = FamilyAccessForm(request.POST or None)
+        if form.is_valid():
+            FamilyAccess.objects.create(
+                user=form.cleaned_data['user'],
+                wallet=Wallet.objects.get(user=request.user, pk=wallet_pk)
+            )
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 "Added user: {}"
+                                 .format(form.cleaned_data['user'].username))
+            next = request.GET.get('next')
+            return HttpResponseRedirect(next)
+        context = {'form': form,
+                   'go_next': next,
+                   'page_title':'Add user',
+                   'button_title':'Back'}
+        return render(request, 'page_manager.html', context)
+    pass

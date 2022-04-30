@@ -1,6 +1,13 @@
 {% extends 'home.html' %}
 <title>{{ page_title }}</title>
 {% block content %}
+<div class="container">
+    {% if messages %}
+    {% for message in messages %}
+    <span class="message message_{{ message.tags }}">{{ message }}</span>
+    {% endfor %}
+    {% endif %}
+</div>
     <div class="title_name_block">
         <p class="block-title">{{ page_title }}</p>
         <div class="actions">            

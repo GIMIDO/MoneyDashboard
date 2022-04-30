@@ -65,6 +65,20 @@
         {% endfor %}
     </div>
 
+    {% if f_wallets %}
+    <div class="title_name_block">
+        <p class="block-title">Family Access Wallets</p>
+    </div>
+    <hr>
+    <div class="container">
+        {% for f_wallet in f_wallets %}
+        <div class="card">
+            <a class="name" href="{% url 'wallet-page' pk=f_wallet.wallet.pk %}">Wallet: {{ f_wallet.wallet.title }} / Curr: {{ f_wallet.wallet.currency }} / Amount: {{ f_wallet.wallet.start_amount }} / {{ f_wallet.wallet.user.username }}</a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     {% endblock content %}
 
     </main>
