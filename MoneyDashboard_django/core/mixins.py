@@ -14,16 +14,21 @@ class AuthenticatedUserMixin(object):
         return super().dispatch(request, *args, **kwargs)
 
 
-class MainUserAccessMixin(SingleObjectMixin):
+class MainUserAccessMixin(object):
     def dispatch(self, request, *args, **kwargs):
-        # for main user
-        try:
-            Wallet.objects.get(user=request.user, pk=(kwargs.get('wallet_pk')))
-        # for not main user :)
-        except ObjectDoesNotExist:
-            messages.add_message(request,
-                        messages.WARNING,
-                        "Access denied!")
+        if request.GET.get('next'):
             next = request.GET.get('next')
+        else:
+            next = '/'
+
+        try:
+            Wallet.objects.get(user=request.user, pk=kwargs.get('wallet_pk'))
+        except ObjectDoesNotExist:
+            messages.add_message(request, messages.WARNING, "Error!")
             return redirect(next)
+        return super().dispatch(request, *args, **kwargs)
+
+
+class Name(object):
+    def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)

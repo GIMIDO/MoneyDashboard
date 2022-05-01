@@ -66,10 +66,10 @@ class ActionForm(forms.ModelForm):
             'date': DateInput()
         }
 
-    def __init__(self, user, wallet_pk, *args, **kwargs):
+    def __init__(self, wallet_pk, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['title'].label = 'Title'
-        self.fields['category'].queryset = Category.objects.filter(user=user, wallet=wallet_pk)
+        self.fields['category'].queryset = Category.objects.filter(wallet=wallet_pk)
 
 
 class CategoryForm(forms.ModelForm):

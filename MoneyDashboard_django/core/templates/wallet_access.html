@@ -12,7 +12,7 @@
 <div class="title_name_block">
     <p class="block-title">Accessed users</p>
     <div class="actions">
-        <a class="button_round" href="{% url 'add-access' pk=wallet_pk %}?next={{ request.path }}">Add</a>
+        <a class="button_round" href="{% url 'add-access' wallet_pk=wallet_pk %}?next={{ request.path }}">Add</a>
         <a class="button_round" href="{% url 'wallet-page' wallet_pk %}">Back</a>
     </div>
 </div>
@@ -21,9 +21,9 @@
 <div class="container">
     {% for t_walle in t_wallet %}
     <div class="card">
-        <a class="name" href="#">{{ t_walle.user.username }}</a>
+        <p class="name">{{ t_walle.user.username }}</p>
         <div class="list">
-            <a class="button_round delete" href="{% url 'delete-access' pk=t_walle.wallet.pk user=t_walle.user.username %}?next={{ request.path }}">Delete</a>
+            <a class="button_round delete" href="{% url 'delete-access' wallet_pk=t_walle.wallet.pk user=t_walle.user.username %}?next={{ request.path }}">Delete</a>
         </div>
     </div>
     {% endfor %}

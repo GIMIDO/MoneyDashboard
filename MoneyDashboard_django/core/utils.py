@@ -45,7 +45,7 @@ def calc_amount(actions):
     return total_amount
 
 
-def search_actions(wallet_pk, q_from, q_to, q_category, q_user):
+def search_actions(wallet_pk, q_from, q_to, q_category):
     if q_category:
         actions_all = Action.objects.filter(category=q_category, wallet=wallet_pk)
     else:
