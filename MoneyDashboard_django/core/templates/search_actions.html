@@ -39,15 +39,25 @@
     <div class="container">
         {% for action in page_obj %}
         <div class="card">
-            <a class="name" href="{% url 'update-action' wallet.pk action.pk %}?next={{ request.get_full_path|urlencode }}">({{ action.category }}) {{ action.title }}</a>
+            {% if action.user == request.user %}
+            <a class="name" href="{% url 'update-action' wallet.pk action.pk %}?next={{ request.path }}">({{ action.category.title }}) {{ action.title }} {{ action.user.username }}</a>
+            {% else %}
+            <p class="name">({{ action.category.title }}) {{ action.title }} {{ action.user.username }}</p>
+            {% endif %}
             <div class="list">
                 {% if action.action_type == 'increase' %}
-                <p class="money increase">{{ action.money }} <span>BYN</span></p>
+                <p class="money increase">{{ action.money }} <span>{{ action.wallet.currency.title }}</span></p>
                 {% else %}
-                <p class="money spending">{{ action.money }} <span>BYN</span></p>
+                <p class="money spending">{{ action.money }} <span>{{ action.wallet.currency.title }}</span></p>
                 {% endif %}
                 <p class="date">{{ action.date }}</p>
-                <a class="button_round delete" href="{% url 'delete-action' pk=action.pk model='action' %}?next={{ request.get_full_path|urlencode }}">Delete</a>
+                {% if wallet.user == request.user %}
+                    <a class="button_round delete" href="{% url 'delete-action' wallet_pk=wallet.pk pk=action.pk %}?next={{ request.path }}">Delete</a>
+                {% else %}
+                    {% if action.user == request.user %}
+                        <a class="button_round delete" href="{% url 'delete-action' wallet_pk=wallet.pk pk=action.pk %}?next={{ request.path }}">Delete</a>
+                    {% endif %}
+                {% endif %}
             </div>
         </div>
         {% endfor %}

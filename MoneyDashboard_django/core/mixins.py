@@ -6,15 +6,15 @@ from django.views.generic.detail import SingleObjectMixin
 from .models import *
 
 
-class AuthenticatedUserMixin(object):
+class AuthUserMixin(object):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             messages.add_message(request, messages.INFO, 'Сначала войдите в аккаунт!')
-            return redirect('sign-in')
+            return redirect('login')
         return super().dispatch(request, *args, **kwargs)
 
 
-class MainUserAccessMixin(object):
+class OwnerAccessMixin(object):
     def dispatch(self, request, *args, **kwargs):
         if request.GET.get('next'):
             next = request.GET.get('next')

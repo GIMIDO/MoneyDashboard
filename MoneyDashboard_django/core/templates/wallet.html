@@ -31,9 +31,9 @@
         {% for action in page_obj %}
         <div class="card">
             {% if action.user == request.user %}
-            <a class="name" href="{% url 'update-action' wallet.pk action.pk %}?next={{ request.path }}">({{ action.category.title }}) {{ action.title }} {{ action.user.username }}</a>
+            <a class="name" href="{% url 'update-action' wallet.pk action.pk %}?next={{ request.path }}"><span class="owner_title">{{ action.user.username }}</span> ({{ action.category.title }}) {{ action.title }}</a>
             {% else %}
-            <p class="name">({{ action.category.title }}) {{ action.title }} {{ action.user.username }}</p>
+            <p class="name_no_hover"><span class="owner_title">{{ action.user.username }}</span> ({{ action.category.title }}) {{ action.title }} </p>
             {% endif %}
             <div class="list">
                 {% if action.action_type == 'increase' %}
@@ -122,7 +122,7 @@
                     <a class="button_round delete" href="{% url 'delete-category' wallet_pk=wallet.pk pk=category.pk %}?next={{ request.get_full_path|urlencode }}">Delete</a>
                 </div>
                 {% else %}
-                <p class="name">{{ category.title }} ({{ category.user }})</p>
+                <p class="name_no_hover">{{ category.title }} ({{ category.user }})</p>
                 {% endif %}
             {% endif %}
         </div>

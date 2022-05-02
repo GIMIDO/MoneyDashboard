@@ -17,8 +17,6 @@ def calc_amount_wallet(a_type, action, pk):
     w_amount.save()
 
 def calc_amount_wallet_update(action, pk, old_action):
-    print(action)
-    print(old_action)
     w_amount = Wallet.objects.get(pk=pk)
     if old_action.action_type == 'increase':
         w_amount.start_amount -= float(old_action.money)
@@ -65,3 +63,10 @@ def search_actions(wallet_pk, q_from, q_to, q_category):
         else:
             actions = actions_all
     return actions
+
+
+def get_next_link(request):
+    if request.GET.get('next'):
+        return request.GET.get('next')
+    else:
+        return '/'

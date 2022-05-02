@@ -26,12 +26,12 @@ urlpatterns = [
     path('currency/<int:pk>/update/', UpdateCurrency.as_view(), name='update-currency'),
 
     # auth
-    path('sign-in/', LoginView.as_view(), name='sign-in'),
+    path('login/', LoginView.as_view(), name='login'),
     path('sign-out/', LogoutView.as_view(), name='sign-out'),
-    path('sign-up/', RegistrationView.as_view(), name='sign-up'),
+    path('registration/', RegistrationView.as_view(), name='registration'),
 
     # access
-    path('wallet/access/<int:wallet_pk>/add/', AddAccessView.as_view(), name='add-access'),
     path('wallet/<int:wallet_pk>/access/', FamilyAccessView.as_view(), name='wallet-access'),
+    path('wallet/access/<int:wallet_pk>/add/', AddAccessView.as_view(), name='add-access'),
     path('wallet/access/<int:wallet_pk>/<str:user>/delete/', DeleteAccessView.as_view(), name='delete-access')
 ]

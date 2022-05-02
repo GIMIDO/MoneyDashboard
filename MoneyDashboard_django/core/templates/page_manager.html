@@ -16,9 +16,9 @@
             {% endif %}
             {% if auth_check%}
             {% if auth_check == 1 %}
-            <a class="button_round" href="{% url 'sign-up' %}">{{ button_title }}</a>
+            <a class="button_round" href="{% url 'registration' %}">{{ button_title }}</a>
             {% else %}
-            <a class="button_round" href="{% url 'sign-in' %}">{{ button_title }}</a>
+            <a class="button_round" href="{% url 'login' %}">{{ button_title }}</a>
             {% endif %}
             {% endif %}
         </div>
