@@ -21,7 +21,7 @@
     <main>
 
     {% block content %}
-    <div class="container">
+    <div class="container message-container">
         {% if messages %}
         {% for message in messages %}
         <span class="message message_{{ message.tags }}">{{ message }}</span>
@@ -30,6 +30,7 @@
     </div>
     <div class="title_name_block">
         <p class="block-title">Currencys</p>
+        <span class="message info-message">{{ currencies.count }}</span>
         <div class="actions">
             <a class="button_round" href="{% url 'create-currency' %}?next={{ request.path }}">Create&nbspCurrency</a>
         </div>
@@ -48,6 +49,7 @@
 
     <div class="title_name_block">
         <p class="block-title">Your wallets</p>
+        <span class="message info-message">{{ wallets.count }}</span>
         <div class="actions">
             <a class="button_round" href="{% url 'create-wallet' %}?next={{ request.path }}">Create&nbspWallet</a>
         </div>

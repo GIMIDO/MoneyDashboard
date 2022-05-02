@@ -10,7 +10,7 @@ from .forms import *
 from .utils import *
 from .mixins import *
 
-
+# home
 class HomePage(AuthUserMixin, View):
 
     def get(self, request):
@@ -20,25 +20,7 @@ class HomePage(AuthUserMixin, View):
         context = {'wallets': wallets, 'currencies': currencies, 'f_wallets': f_wallets}
         return render(request, 'home.html', context)
 
-class WalletView(AuthUserMixin, View):
-
-    def get(self, request, **kwargs):
-        wallet = Wallet.objects.get(pk=kwargs.get('wallet_pk'))
-        if FamilyAccess.objects.filter(user=request.user, wallet=wallet) or wallet.user == request.user:
-            actions = Action.objects.filter(wallet=(kwargs.get('wallet_pk'))).order_by('-date', '-created_at')
-            categories = Category.objects.filter(wallet=(kwargs.get('wallet_pk')))
-
-            paginator = Paginator(actions, 10)
-            page_number = request.GET.get('page')
-            page_obj = paginator.get_page(page_number)
-
-            context = {'wallet': wallet, 'total_amount': wallet.start_amount, 'page_obj': page_obj, 'categories':categories}
-            return render(request, 'wallet.html', context)
-        else:
-            messages.add_message(request, messages.WARNING, "Error!")
-            return HttpResponseRedirect(get_next_link(request))
-
-
+# auth
 class LoginView(View):
 
     def get(self, request):
@@ -87,7 +69,7 @@ class LogoutView(View):
         logout(request)
         return redirect('login')
 
-
+# search
 class SearchResultsView(AuthUserMixin, View):
 
     def get(self, request, **kwargs):
@@ -116,7 +98,7 @@ class SearchResultsView(AuthUserMixin, View):
             messages.add_message(request, messages.WARNING, "Error!")
             return HttpResponseRedirect(get_next_link(request))
 
-
+# download
 class DownloadJSON(AuthUserMixin, View):
 
     def get(self, request, **kwargs):
@@ -136,7 +118,7 @@ class DownloadJSON(AuthUserMixin, View):
             messages.add_message(request, messages.WARNING, "Error!")
             return HttpResponseRedirect(get_next_link(request))
 
-
+# action
 class CreateAction(AuthUserMixin, View):
 
     def get(self, request, **kwargs):
@@ -194,7 +176,7 @@ class UpdateAction(AuthUserMixin, View):
         context = {'form': form, 'go_next': get_next_link(request), 'page_title':'Update action', 'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
-
+# category
 class CreateCategory(AuthUserMixin, View):
 
     def get(self, request, **kwargs):
@@ -246,7 +228,24 @@ class UpdateCategory(AuthUserMixin, View):
         context = {'form': form,'go_next': get_next_link(request),'page_title':'Update category','button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
+class CategoryManager(AuthUserMixin, View):
+    def get(self, request, **kwargs):
+        wallet = Wallet.objects.get(pk=kwargs.get('wallet_pk'))
+        if FamilyAccess.objects.filter(user=request.user, wallet=wallet) or wallet.user == request.user:
+            categories = Category.objects.filter(wallet=(kwargs.get('wallet_pk')))
 
+            paginator = Paginator(categories, 10)
+            page_number = request.GET.get('page')
+            page_obj = paginator.get_page(page_number)
+
+            context = {'wallet': wallet, 'page_obj': page_obj, 'count': categories.count}
+            return render(request, 'category_manager.html', context)
+        else:
+            messages.add_message(request, messages.WARNING, "Error!")
+            return HttpResponseRedirect(get_next_link(request))
+    pass
+
+# wallet
 class CreateWallet(AuthUserMixin, View):
 
     def get(self, request):
@@ -291,7 +290,25 @@ class UpdateWallet(AuthUserMixin, View):
         context = {'form': form,'go_next': get_next_link(request), 'page_title':'Update wallet', 'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
+class WalletView(AuthUserMixin, View):
 
+    def get(self, request, **kwargs):
+        wallet = Wallet.objects.get(pk=kwargs.get('wallet_pk'))
+        if FamilyAccess.objects.filter(user=request.user, wallet=wallet) or wallet.user == request.user:
+            actions = Action.objects.filter(wallet=(kwargs.get('wallet_pk'))).order_by('-date', '-created_at')
+            categories = Category.objects.filter(wallet=(kwargs.get('wallet_pk')))
+
+            paginator = Paginator(actions, 10)
+            page_number = request.GET.get('page')
+            page_obj = paginator.get_page(page_number)
+
+            context = {'wallet': wallet, 'total_amount': wallet.start_amount, 'page_obj': page_obj, 'count': actions.count, 'categories': categories}
+            return render(request, 'wallet.html', context)
+        else:
+            messages.add_message(request, messages.WARNING, "Error!")
+            return HttpResponseRedirect(get_next_link(request))
+
+# currency
 class CreateCurrency(AuthUserMixin, View):
 
     def get(self, request):
@@ -333,7 +350,7 @@ class UpdateCurrency(AuthUserMixin, View):
         context = {'form': form, 'go_next': get_next_link(request), 'page_title':'Update currency', 'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
-
+# delete
 class DeleteModelView(AuthUserMixin, View):
 
     MODEL_CHOISE = {
@@ -373,7 +390,7 @@ class DeleteCategoryView(AuthUserMixin, View):
             messages.add_message(request,messages.WARNING,"Error!")
             return HttpResponseRedirect(get_next_link(request))
 
-
+# family access
 class FamilyAccessView(AuthUserMixin, OwnerAccessMixin, View):
 
     def get(self, request, **kwargs):

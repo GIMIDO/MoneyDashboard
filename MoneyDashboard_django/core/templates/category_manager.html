@@ -1,0 +1,42 @@
+{% extends 'home.html' %}
+<title>{{ page_title }}</title>
+{% block content %}
+<div class="container">
+    {% if messages %}
+    {% for message in messages %}
+    <span class="message message_{{ message.tags }}">{{ message }}</span>
+    {% endfor %}
+    {% endif %}
+</div>
+
+<div class="title_name_block">
+    <p class="block-title">Categories</p>
+    <span class="message info-message">{{ count }}</span>
+    <div class="actions">
+        <a class="button_round" href="{% url 'create-category' wallet.pk %}?next={{ request.path }}">Create&nbspCategory</a>
+        <a class="button_round" href="{% url 'wallet-page' wallet_pk=wallet.pk %}">Back</a>
+    </div>
+</div>
+<hr>
+<div class="container">
+    {% for category in page_obj %}
+    <div class="card">
+        {% if wallet.user == request.user %}
+            <a class="name" href="{% url 'update-category' wallet.pk category.pk %}?next={{ request.get_full_path|urlencode }}"><span class="owner-title">{{ category.user }}</span> {{ category.title }}</a>
+            <div class="list">
+                <a class="button_round delete" href="{% url 'delete-category' wallet_pk=wallet.pk pk=category.pk %}?next={{ request.get_full_path|urlencode }}">Delete</a>
+            </div>
+        {% else %}
+            {% if category.user == request.user %}
+            <a class="name span-name" href="{% url 'update-category' wallet.pk category.pk %}?next={{ request.get_full_path|urlencode }}"><span>{{ category.user }}</span> {{ category.title }} </a>
+            <div class="list">
+                <a class="button_round delete" href="{% url 'delete-category' wallet_pk=wallet.pk pk=category.pk %}?next={{ request.get_full_path|urlencode }}">Delete</a>
+            </div>
+            {% else %}
+            <p class="name_no_hover"><span>{{ category.user }}</span> {{ category.title }}</p>
+            {% endif %}
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock content %}

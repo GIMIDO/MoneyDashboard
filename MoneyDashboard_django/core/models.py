@@ -1,3 +1,4 @@
+from operator import mod
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth import get_user_model
@@ -62,3 +63,11 @@ class Action(models.Model):
 class FamilyAccess(models.Model):
     wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+
+class Profile(models.Model):
+    user = models.ForeignKey(User, verbose_name='User', on_delete=models.CASCADE)
+    first_name = models.CharField(verbose_name='name', null=True, max_length=255)
+    last_name = models.CharField(verbose_name='surname', null=True, max_length=255)
+    avatar = models.ImageField(verbose_name='Avatar', default=None, null=True)
+    bio = models.TextField(verbose_name='BIO', null=True)
