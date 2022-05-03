@@ -1,0 +1,28 @@
+{% extends 'home.html' %}
+{% block content %}
+<div class="title_name_block">
+    <p class="block-title">{{ profile.user.username }}</p>
+    <div class="actions">
+        <a class="button_round" href="{% url 'profile-update' profile.user.username %}?next={{ request.get_full_path|urlencode }}">Update profile</a>
+        <a class="button_round" href="{{ go_next }}">{{ button_title }}</a>
+    </div>
+</div>
+
+<div class="container">
+
+    {{ profile.first_name }}
+    {{ profile.last_name }}
+    {{ profile.bio }}
+    {% if profile.avatar %}
+    <img src="{{ profile.avatar.url }}" alt="..." />
+    {% endif %}
+</div>
+
+<div class="container">
+    {% if messages %}
+    {% for message in messages %}
+    <span class="message message_{{ message.tags }}">{{ message }}</span>
+    {% endfor %}
+    {% endif %}
+</div>
+{% endblock content %}

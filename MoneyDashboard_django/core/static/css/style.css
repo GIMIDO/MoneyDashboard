@@ -299,9 +299,9 @@ ul.errorlist > li {
     margin-left: 10px;
 }
 /* help text -django */
-span.helptext {
+/* span.helptext {
     display: none;
-}
+} */
 
 /* MESSAGE */
 .message {

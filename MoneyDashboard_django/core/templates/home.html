@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Home</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
@@ -12,7 +11,7 @@
             <p class="logo_text">Cash accounting</p>
             <div class="login_buttons">
                 {% if request.user.is_authenticated %}
-                <p class="message">{{ request.user.username }}</p>
+                <a class="button_round" href="{% url 'profile' request.user %}">{{ request.user.username }}</a>
                 <a class="button_round" href="{% url 'sign-out' %}">Sign Out</a>
                 {% endif %}
             </div>

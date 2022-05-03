@@ -25,7 +25,8 @@ class LoginView(View):
 
     def get(self, request):
         form = LoginForm(request.POST or None)
-        context = {'form': form, 'auth_check': 1, 'page_title':'Sign In', 'button_title':'Sign Up'}
+        context = {'form': form, 'auth_check': 1,
+                   'page_title':'Sign In', 'button_title':'Sign Up'}
         return render(request, 'page_manager.html', context)
 
     def post(self, request):
@@ -37,30 +38,40 @@ class LoginView(View):
             if user:
                 login(request, user)
                 return HttpResponseRedirect(get_next_link(request))
-        context = {'form': form, 'auth_check': 1, 'page_title':'Sign In', 'button_title':'Sign Up'}
+        context = {'form': form, 'auth_check': 1,
+                   'page_title':'Sign In', 'button_title':'Sign Up'}
         return render(request, 'page_manager.html', context)
 
 class RegistrationView(View):
 
     def get(self, request):
         form = RegistrationForm(request.POST or None)
-        context = {'form': form, 'auth_check': 2, 'page_title':'Sign Up', 'button_title':'Sign In'}
+        context = {'form': form, 'auth_check': 2,
+                   'page_title':'Sign Up', 'button_title':'Sign In'}
         return render(request, 'page_manager.html', context)
 
     def post(self, request):
         form = RegistrationForm(request.POST or None)
         if form.is_valid():
-            User.objects.create_user(
+
+            created_user = User.objects.create_user(
                 username=form.cleaned_data['username'],
                 password=form.cleaned_data['password'],
                 email=form.cleaned_data['email'])
+            created_user.save()
+
             user = authenticate(
                 username=form.cleaned_data['username'],
                 password=form.cleaned_data['password'])
+
+            Profile.objects.create(user=created_user)
+
             login(request, user)
+            
             messages.add_message(request, messages.SUCCESS, "Registation completed!")
             return HttpResponseRedirect(get_next_link(request))
-        context = {'form': form, 'auth_check': 2, 'page_title':'Sign Up', 'button_title':'Sign In'}
+        context = {'form': form, 'auth_check': 2,
+                   'page_title':'Sign Up', 'button_title':'Sign In'}
         return render(request, 'page_manager.html', context)
 
 class LogoutView(View):
@@ -125,7 +136,8 @@ class CreateAction(AuthUserMixin, View):
         wallet = Wallet.objects.get(pk=kwargs.get('wallet_pk'))
         if FamilyAccess.objects.filter(user=request.user, wallet=wallet) or wallet.user == request.user:
             form = ActionForm(kwargs.get('wallet_pk'), request.POST or None)
-            context = {'form': form, 'go_next': get_next_link(request), 'page_title':'Create action', 'button_title':'Back'}
+            context = {'form': form, 'go_next': get_next_link(request),
+                       'page_title':'Create action', 'button_title':'Back'}
             return render(request, 'page_manager.html', context)
         else:
             messages.add_message(request, messages.WARNING, "Error!")
@@ -147,7 +159,8 @@ class CreateAction(AuthUserMixin, View):
             calc_amount_wallet('create',action, kwargs.get('wallet_pk'))
             messages.add_message(request, messages.SUCCESS, "Added action: {}".format(form.cleaned_data['title']))
             return HttpResponseRedirect(get_next_link(request))
-        context = {'form': form, 'go_next': get_next_link(request), 'page_title':'Create action', 'button_title':'Back'}
+        context = {'form': form, 'go_next': get_next_link(request),
+                   'page_title':'Create action', 'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
 class UpdateAction(AuthUserMixin, View):
@@ -156,7 +169,8 @@ class UpdateAction(AuthUserMixin, View):
         if (Action.objects.get(pk=kwargs.get('pk')).user == request.user) or (Wallet.objects.get(pk=kwargs.get('wallet_pk')).user == request.user):
             action = Action.objects.get(pk=(kwargs.get('pk')))
             form = ActionForm(kwargs.get('wallet_pk'), request.POST or None, instance=action)
-            context = {'form': form,'go_next': get_next_link(request), 'page_title':'Update action', 'button_title':'Back'}
+            context = {'form': form,'go_next': get_next_link(request),
+                       'page_title':'Update action', 'button_title':'Back'}
             return render(request, 'page_manager.html', context)
         else:
             messages.add_message(request,messages.WARNING,"Error!")
@@ -173,7 +187,8 @@ class UpdateAction(AuthUserMixin, View):
             return HttpResponseRedirect(get_next_link(request))
         else:
             form = ActionForm(instance=action)
-        context = {'form': form, 'go_next': get_next_link(request), 'page_title':'Update action', 'button_title':'Back'}
+        context = {'form': form, 'go_next': get_next_link(request),
+                   'page_title':'Update action', 'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
 # category
@@ -199,7 +214,8 @@ class CreateCategory(AuthUserMixin, View):
             Category.objects.create(title=form.cleaned_data['title'], wallet=wallet,  user=request.user)
             messages.add_message(request, messages.SUCCESS, "Added category: {}!".format(form.cleaned_data['title']))
             return HttpResponseRedirect(get_next_link(request))
-        context = {'form': form, 'go_next': get_next_link(request), 'page_title':'Create category',  'button_title':'Back'}
+        context = {'form': form, 'go_next': get_next_link(request),
+                   'page_title':'Create category',  'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
 class UpdateCategory(AuthUserMixin, View):
@@ -208,7 +224,8 @@ class UpdateCategory(AuthUserMixin, View):
         if (Category.objects.get(pk=kwargs.get('pk')).user == request.user) or (Wallet.objects.get(pk=kwargs.get('wallet_pk')).user == request.user):
             category = Category.objects.get(pk=kwargs.get('pk'))
             form = CategoryForm(request.POST or None, instance=category)
-            context = {'form': form, 'go_next': get_next_link(request), 'page_title':'Update category', 'button_title':'Back'}
+            context = {'form': form, 'go_next': get_next_link(request),
+                       'page_title':'Update category', 'button_title':'Back'}
             return render(request, 'page_manager.html', context)
         else:
             messages.add_message(request,messages.WARNING,"Error!")
@@ -225,7 +242,8 @@ class UpdateCategory(AuthUserMixin, View):
         else:
             form = CategoryForm(instance=category)
 
-        context = {'form': form,'go_next': get_next_link(request),'page_title':'Update category','button_title':'Back'}
+        context = {'form': form,'go_next': get_next_link(request),
+                   'page_title':'Update category','button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
 class CategoryManager(AuthUserMixin, View):
@@ -251,7 +269,8 @@ class CreateWallet(AuthUserMixin, View):
     def get(self, request):
         form = WalletForm(request.user,
                           request.POST or None)
-        context = {'form': form, 'go_next': get_next_link(request), 'page_title':'Create wallet', 'button_title':'Back'}
+        context = {'form': form, 'go_next': get_next_link(request),
+                   'page_title':'Create wallet', 'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
     def post(self, request):
@@ -263,7 +282,8 @@ class CreateWallet(AuthUserMixin, View):
                                   start_amount=form.cleaned_data['start_amount'])
             messages.add_message(request, messages.SUCCESS, "Added wallet: {}!".format(form.cleaned_data['title']))
             return HttpResponseRedirect(get_next_link(request))
-        context = {'form': form, 'go_next': get_next_link(request), 'page_title':'Create wallet', 'button_title':'Back'}
+        context = {'form': form, 'go_next': get_next_link(request),
+                   'page_title':'Create wallet', 'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
 class UpdateWallet(AuthUserMixin, View):
@@ -272,7 +292,8 @@ class UpdateWallet(AuthUserMixin, View):
         if (Wallet.objects.get(pk=kwargs.get('wallet_pk')).user == request.user):
             wallet = Wallet.objects.get(user=request.user, pk=(kwargs.get('wallet_pk')))
             form = WalletForm(request.user, request.POST or None, instance=wallet)
-            context = {'form': form, 'go_next': get_next_link(request), 'page_title':'Update wallet', 'button_title':'Back'}
+            context = {'form': form, 'go_next': get_next_link(request),
+                       'page_title':'Update wallet', 'button_title':'Back'}
             return render(request, 'page_manager.html', context)
         else:
             messages.add_message(request,messages.WARNING,"Error!")
@@ -287,7 +308,8 @@ class UpdateWallet(AuthUserMixin, View):
             return HttpResponseRedirect(get_next_link(request))
         else:
             form = CategoryForm(instance=wallet)
-        context = {'form': form,'go_next': get_next_link(request), 'page_title':'Update wallet', 'button_title':'Back'}
+        context = {'form': form,'go_next': get_next_link(request),
+                   'page_title':'Update wallet', 'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
 class WalletView(AuthUserMixin, View):
@@ -313,7 +335,8 @@ class CreateCurrency(AuthUserMixin, View):
 
     def get(self, request):
         form = CurrencyForm(request.POST or None)
-        context = {'form': form, 'go_next': get_next_link(request),'page_title':'Create currency','button_title':'Back'}
+        context = {'form': form, 'go_next': get_next_link(request),
+                   'page_title':'Create currency','button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
     def post(self, request):
@@ -323,7 +346,8 @@ class CreateCurrency(AuthUserMixin, View):
             messages.add_message(request, messages.SUCCESS, "Added currency: {} [{}]!".format(form.cleaned_data['title'],
                                                                                               form.cleaned_data['coef']))
             return HttpResponseRedirect(get_next_link(request))
-        context = {'form': form, 'go_next': get_next_link(request),'page_title':'Create currency', 'button_title':'Back'}
+        context = {'form': form, 'go_next': get_next_link(request),
+                   'page_title':'Create currency', 'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
 class UpdateCurrency(AuthUserMixin, View):
@@ -332,7 +356,8 @@ class UpdateCurrency(AuthUserMixin, View):
         if (Currency.objects.get(pk=kwargs.get('pk')).user == request.user):
             currency = Currency.objects.get(user=request.user, pk=(kwargs.get('pk')))
             form = CurrencyForm(request.POST or None,  instance=currency)
-            context = {'form': form, 'go_next': get_next_link(request), 'page_title':'Update currency', 'button_title':'Back'}
+            context = {'form': form, 'go_next': get_next_link(request),
+                       'page_title':'Update currency', 'button_title':'Back'}
             return render(request, 'page_manager.html', context)
         else:
             messages.add_message(request,messages.WARNING,"Error!")
@@ -347,7 +372,8 @@ class UpdateCurrency(AuthUserMixin, View):
             return HttpResponseRedirect(get_next_link(request))
         else:
             form = CurrencyForm(instance=currency)
-        context = {'form': form, 'go_next': get_next_link(request), 'page_title':'Update currency', 'button_title':'Back'}
+        context = {'form': form, 'go_next': get_next_link(request),
+                   'page_title':'Update currency', 'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
 # delete
@@ -413,7 +439,8 @@ class AddAccessView(AuthUserMixin, OwnerAccessMixin, View):
 
     def get(self, request, **kwargs):
         form = FamilyAccessForm(request.POST or None)
-        context = {'form': form, 'go_next': get_next_link(request), 'page_title': 'Add user', 'button_title':'Back'}
+        context = {'form': form, 'go_next': get_next_link(request), 
+                   'page_title': 'Add user', 'button_title':'Back'}
         return render(request, 'page_manager.html', context)
 
     def post(self, request, **kwargs):
@@ -422,5 +449,44 @@ class AddAccessView(AuthUserMixin, OwnerAccessMixin, View):
             FamilyAccess.objects.create(user=form.cleaned_data['user'],wallet=Wallet.objects.get(user=request.user, pk=kwargs.get('wallet_pk')))
             messages.add_message(request, messages.SUCCESS, "Added user: {}".format(form.cleaned_data['user'].username))
             return HttpResponseRedirect(get_next_link(request))
-        context = {'form': form, 'go_next': get_next_link(request), 'page_title':'Add user', 'button_title':'Back'}
+        context = {'form': form, 'go_next': get_next_link(request),
+                   'page_title':'Add user', 'button_title':'Back'}
+        return render(request, 'page_manager.html', context)
+
+# profile
+class ProfileView(AuthUserMixin, View):
+
+    def get(self, request, **kwargs):
+        user_profile = User.objects.get(username=kwargs.get('username'))
+        profile = Profile.objects.get(user=user_profile)
+        messages.add_message(request, messages.SUCCESS, "User profile: {}".format(kwargs.get('username')))
+
+        context = {'go_next': get_next_link(request), 'profile': profile,
+                   'button_title':'Back'}
+        return render(request, 'profile.html', context)
+
+class ProfileUpdate(AuthUserMixin, View):
+
+    def get(self, request, **kwargs):
+        profile = Profile.objects.get(user=User.objects.get(username=kwargs.get('username')))
+        if profile.user == request.user:
+            form = ProfileForm(request.POST or None, instance=profile)
+            context = {'form':form ,'go_next': get_next_link(request),
+                       'page_title':'Profile update', 'button_title':'Back'}
+            return render(request, 'page_manager.html', context)
+        else:
+            messages.add_message(request, messages.WARNING, "Error!")
+            return HttpResponseRedirect(get_next_link(request))
+
+    def post(self, request, **kwargs):
+        profile = Profile.objects.get(user=User.objects.get(username=kwargs.get('username')))
+        form = ProfileForm(request.POST or None, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request, messages.SUCCESS, "Profile updated!")
+            return HttpResponseRedirect(get_next_link(request))
+        else:
+            form = ProfileForm(instance=profile)
+        context = {'form': form, 'go_next': get_next_link(request),
+                   'page_title':'Update profile', 'button_title':'Back'}
         return render(request, 'page_manager.html', context)

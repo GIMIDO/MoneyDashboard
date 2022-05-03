@@ -117,3 +117,12 @@ class FamilyAccessForm(forms.ModelForm):
     class Meta:
         model = FamilyAccess
         fields = ['user']
+
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['first_name', 'last_name', 'avatar', 'bio']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)

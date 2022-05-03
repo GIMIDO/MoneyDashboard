@@ -1,5 +1,4 @@
 {% extends 'home.html' %}
-<title>{{ page_title }}</title>
 {% block content %}
 <div class="container">
     {% if messages %}
@@ -10,7 +9,7 @@
 </div>
 
 <div class="title_name_block">
-    <p class="block-title">Categories</p>
+    <p class="block-title">Category Manager</p>
     <span class="message info-message">{{ count }}</span>
     <div class="actions">
         <a class="button_round" href="{% url 'create-category' wallet.pk %}?next={{ request.path }}">Create&nbspCategory</a>

@@ -1,6 +1,8 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
 from .views import *
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     # home
@@ -45,6 +47,10 @@ urlpatterns = [
     path('wallet/<int:wallet_pk>/access-manager/add/', AddAccessView.as_view(), name='add-access'),
     path('wallet/<int:wallet_pk>/access-manager/<str:user>/delete/', DeleteAccessView.as_view(), name='delete-access'),
 
-    # delete
+    # other delete
     path('<str:model>/<int:pk>/delete/', DeleteModelView.as_view(), name='delete-model'),
-]
+
+    # profile
+    path('profile/<str:username>/', ProfileView.as_view(), name='profile'),
+    path('profile/<str:username>/update/', ProfileUpdate.as_view(), name='profile-update'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
