@@ -21,7 +21,7 @@
 <div class="container">
     {% for t_walle in t_wallet %}
     <div class="card">
-        <p class="name">{{ t_walle.user.username }}</p>
+        <a class="name" href="{% url 'profile' t_walle.user.username %}?next={{ request.path }}">{{ t_walle.user.username }}</a>
         <div class="list">
             <a class="button_round delete" href="{% url 'delete-access' wallet_pk=t_walle.wallet.pk user=t_walle.user.username %}?next={{ request.path }}">Delete</a>
         </div>

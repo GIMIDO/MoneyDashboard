@@ -8,7 +8,7 @@
 <body>
     <header>
         <div class="header_items">
-            <p class="logo_text">Cash accounting</p>
+            <a class="logo_text" href="{% url 'home' %}">Goose</a>
             <div class="login_buttons">
                 {% if request.user.is_authenticated %}
                 <a class="button_round" href="{% url 'profile' request.user %}">{{ request.user.username }}</a>

@@ -114,9 +114,19 @@ class CurrencyForm(forms.ModelForm):
 
 class FamilyAccessForm(forms.ModelForm):
 
+    user1 = forms.CharField(widget=forms.TextInput(
+        attrs={'type': 'text'}))
+
     class Meta:
         model = FamilyAccess
-        fields = ['user']
+        fields = ['user1']
+
+    def clean(self):
+        test_user = self.cleaned_data['user1']
+        print(test_user)
+        if not User.objects.filter(username=test_user).exists():
+            raise forms.ValidationError(f'Логин {test_user} не найден!')
+        return self.cleaned_data
 
 
 class ProfileForm(forms.ModelForm):

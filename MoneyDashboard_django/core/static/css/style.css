@@ -47,7 +47,7 @@ header {
     align-items: center;
     display: flex;
     margin: 0 auto;
-    max-width: 1024px;
+    max-width: 1280px;
 }
 .login_buttons {
     display: flex;
@@ -64,12 +64,17 @@ header {
     margin-right: auto;
     font-weight: bold;
     letter-spacing: 2px;
-    user-select: none;
+    color:rgba(0, 0, 0, 1);
+    text-decoration: none;
+}
+.logo_text:hover {
+    color:rgba(0, 0, 0, 0.69);
+    text-decoration: underline;
 }
 
 /* ---------- MAIN ---------- */
 main {
-    width: 1024px;
+    width: 1280px;
     margin: 0 auto;
     padding: 0 10px 0 10px;
 }
@@ -78,7 +83,7 @@ main {
 .title_name_block {
     margin-top: 15px;
     display: flex;
-    width: 1024px;
+    width: 1280px;
 }
 
 /* title */
@@ -139,7 +144,7 @@ main {
 .container {
     display: flex;
     flex-wrap: wrap;
-    width: 1024px;
+    width: 1280px;
     padding: 0 10px 0 10px;
     margin-bottom: 15px;
 }
@@ -161,8 +166,8 @@ main {
     font-family: "Google Sans";
 }
 .name {
-    max-width: 1024px;
-    width: 1024px;
+    max-width: 1280px;
+    width: 1280px;
     font-size: 14px;
     text-decoration: none;
     color: #000000;
@@ -173,10 +178,11 @@ main {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    background-color: #fff;
 }
 .name_no_hover {
-    max-width: 1024px;
-    width: 1024px;
+    max-width: 1280px;
+    width: 1280px;
     font-size: 14px;
     text-decoration: none;
     color: #000000;
@@ -264,7 +270,7 @@ form > p.search_p {
 }
 label {
     max-width: 20%;
-    width: 20%;
+    width: 10%;
     text-align: left;
     margin-right: 10px;
     line-height: 32px;
@@ -279,7 +285,19 @@ input, select {
     margin-top: 5px;
     color: #000000;
 }
-input:focus, select:focus {
+textarea {
+    width: 100%;
+    max-width: 100%;
+    resize: none;
+    font-family: "Google Sans";
+    border: none;
+    border-left: 1px solid #000;
+    background: #E6E6E6;
+    padding: 5px;
+    margin-top: 5px;
+    color: #000000;
+}
+input:focus, select:focus, textarea:focus {
     outline: none
 }
 input.button_round {
@@ -299,9 +317,9 @@ ul.errorlist > li {
     margin-left: 10px;
 }
 /* help text -django */
-/* span.helptext {
+span.helptext {
     display: none;
-} */
+}
 
 /* MESSAGE */
 .message {
@@ -340,5 +358,38 @@ ul.errorlist > li {
 }
 
 i {
-    padding-right: 7.5px;
+    padding: 0 7.5px 0 2.5px;
+}
+
+.profile {
+    display: flex;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #eeeeee;
+    border-radius: 24px;
+}
+.image_square {
+    padding: 0 15px 0 0;
+}
+
+.image_square > img {
+    object-fit: cover;
+    width: 200px;
+    border-radius: 16px;
+}
+
+.info {
+    border-radius: 16px;
+    background-color: #ffffff;
+    padding: 5px 10px;
+    width: calc(100% - 240px);
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+    font-family: 'Google Sans';
+    font-size: 28px;
+}
+
+.info p:last-child {
+    font-size: 20px;
 }

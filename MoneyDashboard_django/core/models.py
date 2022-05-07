@@ -1,4 +1,5 @@
 from operator import mod
+from pyexpat import model
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth import get_user_model
@@ -16,6 +17,7 @@ class Currency(models.Model):
 
     def __str__(self) -> str:
         return f'{self.title} [{self.coef}]'
+
 
 class Wallet(models.Model):
 
@@ -51,7 +53,7 @@ class Action(models.Model):
     user = models.ForeignKey(User,verbose_name='User',on_delete=models.CASCADE)
     category = models.ForeignKey(Category,verbose_name='Category',on_delete=models.CASCADE)
     wallet = models.ForeignKey(Wallet,verbose_name='Wallet',on_delete=models.CASCADE)
-    title = models.CharField(max_length=255,verbose_name='Name')
+    title = models.CharField(max_length=150,verbose_name='Name')
     money = models.FloatField(verbose_name='Price')
     date = models.DateField(verbose_name='Date',default=timezone.now)
     action_type = models.CharField(verbose_name='Action type',choices=TYPE_CHOICES,max_length=8)                         

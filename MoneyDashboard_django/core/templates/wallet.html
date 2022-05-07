@@ -29,11 +29,13 @@
     <hr>
     <div class="container">
         {% for action in page_obj %}
-        <div class="card">
+        <div class="card ">
+            
             {% if action.user == request.user %}
-            <a class="name" href="{% url 'update-action' wallet.pk action.pk %}?next={{ request.path }}"><span class="owner-title">{{ action.user.username }}</span><i>{{ action.category.title }}</i>{{ action.title }}</a>
+            <a class="name" href="{% url 'update-action' wallet.pk action.pk %}?next={{ request.path }}"><span class="owner-title">{{ action.user.username }}</span><i>{{ action.category.title }}</i>{{ action.title }}
+            </a>
             {% else %}
-            <p class="name_no_hover"><span class="owner-title">{{ action.user.username }}</span> ({{ action.category.title }}) {{ action.title }} </p>
+            <p class="name_no_hover"><span class="owner-title">{{ action.user.username }}</span><i>{{ action.category.title }}</i>{{ action.title }}</p>
             {% endif %}
             <div class="list">
                 {% if action.action_type == 'increase' %}
@@ -51,6 +53,7 @@
                 {% endif %}
             </div>
         </div>
+        
         {% endfor %}
     </div>
 

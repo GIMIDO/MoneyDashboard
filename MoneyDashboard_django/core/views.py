@@ -446,8 +446,9 @@ class AddAccessView(AuthUserMixin, OwnerAccessMixin, View):
     def post(self, request, **kwargs):
         form = FamilyAccessForm(request.POST or None)
         if form.is_valid():
-            FamilyAccess.objects.create(user=form.cleaned_data['user'],wallet=Wallet.objects.get(user=request.user, pk=kwargs.get('wallet_pk')))
-            messages.add_message(request, messages.SUCCESS, "Added user: {}".format(form.cleaned_data['user'].username))
+            user = User.objects.get(username=form.cleaned_data['user1'])
+            FamilyAccess.objects.create(user=user,wallet=Wallet.objects.get(user=request.user, pk=kwargs.get('wallet_pk')))
+            messages.add_message(request, messages.SUCCESS, "Added user: {}".format(form.cleaned_data['user1']))
             return HttpResponseRedirect(get_next_link(request))
         context = {'form': form, 'go_next': get_next_link(request),
                    'page_title':'Add user', 'button_title':'Back'}
@@ -459,7 +460,7 @@ class ProfileView(AuthUserMixin, View):
     def get(self, request, **kwargs):
         user_profile = User.objects.get(username=kwargs.get('username'))
         profile = Profile.objects.get(user=user_profile)
-        messages.add_message(request, messages.SUCCESS, "User profile: {}".format(kwargs.get('username')))
+        # messages.add_message(request, messages.SUCCESS, "User profile: {}".format(kwargs.get('username')))
 
         context = {'go_next': get_next_link(request), 'profile': profile,
                    'button_title':'Back'}
