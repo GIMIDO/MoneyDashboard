@@ -269,11 +269,12 @@ form > p.search_p {
     color:rgba(0, 0, 0, 1);
 }
 label {
-    max-width: 20%;
-    width: 10%;
+    /* max-width: 25%; */
+    min-width: 12%;
+    width: auto;
     text-align: left;
     margin-right: 10px;
-    line-height: 32px;
+    /* line-height: 32px; */
 }
 input, select {
     width: 100%;

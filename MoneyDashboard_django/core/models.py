@@ -1,3 +1,4 @@
+from locale import currency
 from operator import mod
 from pyexpat import model
 from django.db import models
@@ -13,10 +14,9 @@ class Currency(models.Model):
 
     user = models.ForeignKey(User,verbose_name='User',on_delete=models.CASCADE)
     title = models.CharField(verbose_name='Currency',max_length=255)
-    coef = models.FloatField(verbose_name='Coefficient')
 
     def __str__(self) -> str:
-        return f'{self.title} [{self.coef}]'
+        return f'{self.title}'
 
 
 class Wallet(models.Model):
@@ -27,7 +27,7 @@ class Wallet(models.Model):
     start_amount = models.FloatField(verbose_name='Start amount')
 
     def __str__(self) -> str:
-        return f'{self.title} {self.currency}'
+        return f'{self.title} {self.currency} {self.start_amount}'
 
 
 class Category(models.Model):
@@ -74,3 +74,14 @@ class Profile(models.Model):
     last_name = models.CharField(verbose_name='surname', blank=True, max_length=255)
     avatar = models.ImageField(verbose_name='Avatar', default=None, blank=True)
     bio = models.TextField(verbose_name='BIO', blank=True)
+
+
+class Objective(models.Model):
+    user = models.ForeignKey(User, verbose_name='User', on_delete=models.CASCADE)
+    currency = models.ForeignKey(Currency,verbose_name='Currency',on_delete=models.CASCADE)
+    title = models.CharField(verbose_name='title', max_length=255)
+    target_amount = models.FloatField(verbose_name='target')
+    now_amount = models.FloatField(verbose_name='now', default=0)
+    
+    def __str__(self) -> str:
+        return f'[{self.user.username}] {self.title} {self.now_amount}/{self.target_amount} {self.currency.title}'

@@ -100,12 +100,9 @@ class WalletForm(forms.ModelForm):
 
 class CurrencyForm(forms.ModelForm):
 
-    coef = forms.CharField(widget=forms.TextInput(
-        attrs={'min':'0.01','max': '9999999','type': 'number', 'step':'0.01'}))
-
     class Meta:
         model = Currency
-        fields = ['title','coef']
+        fields = ['title']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -136,3 +133,36 @@ class ProfileForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+
+class ObjectiveForm(forms.ModelForm):
+    class Meta:
+        model = Objective
+        fields = ['title', 'currency', 'target_amount', 'now_amount']
+
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['currency'].queryset = Currency.objects.filter(user=user)
+
+
+class MoneyTransferForm(forms.Form):
+
+    wallets = forms.ModelChoiceField(queryset=Wallet.objects.all())
+    money = forms.CharField(widget=forms.TextInput(
+        attrs={'min':'0.01','max': '9999999','type': 'number', 'step':'0.01'}))
+
+    def __init__(self, pk, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['wallets'].queryset = Wallet.objects.exclude(pk=pk).filter(user=user)
+
+
+class ObjectiveTransferForm(forms.Form):
+
+    wallets = forms.ModelChoiceField(queryset=Wallet.objects.all())
+    money = forms.CharField(widget=forms.TextInput(
+        attrs={'min':'0.01','max': '9999999','type': 'number', 'step':'0.01'}))
+
+    def __init__(self, currency, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['wallets'].queryset = Wallet.objects.filter(user=user, currency=currency)
+        self.fields['wallets'].label = 'From wallet'

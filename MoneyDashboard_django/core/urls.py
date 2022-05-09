@@ -5,13 +5,13 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    # home
+    #### home
     path('', HomePage.as_view(), name='home'),
 
-    # download
+    #### download
     path('wallet/<int:wallet_pk>/download/', DownloadJSON.as_view(), name='download'),
 
-    # model pages
+    #### model pages
         # wallet view
     path('wallet/<int:wallet_pk>/', WalletView.as_view(), name='wallet-page'),
         # category manager
@@ -32,6 +32,7 @@ urlpatterns = [
     # wallet
     path('wallet/create/', CreateWallet.as_view(), name='create-wallet'),
     path('wallet/<int:wallet_pk>/update/', UpdateWallet.as_view(), name='update-wallet'),
+    path('wallet/<int:wallet_pk>/transfer/', MoneyTransfer.as_view(), name='transfer-wallet'),
 
     # currency
     path('currency/create/', CreateCurrency.as_view(), name='create-currency'),
@@ -47,10 +48,16 @@ urlpatterns = [
     path('wallet/<int:wallet_pk>/access-manager/add/', AddAccessView.as_view(), name='add-access'),
     path('wallet/<int:wallet_pk>/access-manager/<str:user>/delete/', DeleteAccessView.as_view(), name='delete-access'),
 
-    # other delete
+    #### other delete
     path('<str:model>/<int:pk>/delete/', DeleteModelView.as_view(), name='delete-model'),
 
     # profile
     path('profile/<str:username>/', ProfileView.as_view(), name='profile'),
     path('profile/<str:username>/update/', ProfileUpdate.as_view(), name='profile-update'),
+
+    # objectives
+    path('objective/create/', ObjectiveCreate.as_view(), name='objective-create'),
+    path('objective/<int:pk>/update/', ObjectiveUpdate.as_view(), name='objective-update'),
+    path('objective/<int:pk>/transfer/', ObjectiveTransfer.as_view(), name='objective-transfer'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

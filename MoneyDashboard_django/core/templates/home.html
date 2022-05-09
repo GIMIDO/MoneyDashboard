@@ -38,7 +38,7 @@
     <div class="container">
         {% for currency in currencies %}
         <div class="card">
-            <a class="name" href="{% url 'update-currency' currency.pk %}?next={{ request.get_full_path|urlencode }}">{{ currency.title }} [{{ currency.coef }}]</a>
+            <a class="name" href="{% url 'update-currency' currency.pk %}?next={{ request.get_full_path|urlencode }}">{{ currency.title }}</a>
             <div class="list">
                 <a class="button_round delete" href="{% url 'delete-model' pk=currency.pk model='currency' %}?next={{ request.get_full_path|urlencode }}">Delete</a>
             </div>
@@ -79,6 +79,26 @@
         {% endfor %}
     </div>
     {% endif %}
+
+    <div class="title_name_block">
+        <p class="block-title">Objectives</p>
+        <span class="message info-message">{{ objectives.count }}</span>
+        <div class="actions">
+            <a class="button_round" href="{% url 'objective-create' %}?next={{ request.path }}">Create&nbspObjective</a>
+        </div>
+    </div>
+    <hr>
+    <div class="container">
+    {% for objective in objectives %}
+        <div class="card">
+            <a class="name" href="{% url 'objective-update' objective.pk %}?next={{ request.path }}">{{ objective.title }} {{objective.now_amount}}/{{objective.target_amount}} {{objective.currency.title}}</a>
+            <div class="list">
+                <a class="button_round" href="{% url 'objective-transfer' pk=objective.pk %}?next={{ request.path }}">Transfer Money</a>
+                <a class="button_round delete" href="{% url 'delete-model' pk=objective.pk model='objective' %}?next={{ request.path }}">Delete</a>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
 
     {% endblock content %}
 

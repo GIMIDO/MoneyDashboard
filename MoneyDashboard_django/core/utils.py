@@ -70,3 +70,16 @@ def get_next_link(request):
         return request.GET.get('next')
     else:
         return '/'
+
+
+def transfer_money(wallet_from, wallet_to, money):
+    wallet_from.start_amount -= money
+    wallet_from.save()
+    wallet_to.start_amount += money
+    wallet_to.save()
+
+def objective_transfer_money(objective, wallet, money):
+    wallet.start_amount -= money
+    wallet.save()
+    objective.now_amount += money
+    objective.save()

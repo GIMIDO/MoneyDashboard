@@ -17,7 +17,8 @@ class HomePage(AuthUserMixin, View):
         wallets = Wallet.objects.filter(user=request.user)
         currencies = Currency.objects.filter(user=request.user)
         f_wallets = FamilyAccess.objects.filter(user=request.user)
-        context = {'wallets': wallets, 'currencies': currencies, 'f_wallets': f_wallets}
+        objectives = Objective.objects.filter(user=request.user)
+        context = {'wallets': wallets, 'currencies': currencies, 'f_wallets': f_wallets, 'objectives': objectives}
         return render(request, 'home.html', context)
 
 # auth
@@ -342,9 +343,8 @@ class CreateCurrency(AuthUserMixin, View):
     def post(self, request):
         form = CurrencyForm(request.POST or None)
         if form.is_valid():
-            Currency.objects.create(user=request.user, title=form.cleaned_data['title'],coef=form.cleaned_data['coef'])
-            messages.add_message(request, messages.SUCCESS, "Added currency: {} [{}]!".format(form.cleaned_data['title'],
-                                                                                              form.cleaned_data['coef']))
+            Currency.objects.create(user=request.user, title=form.cleaned_data['title'])
+            messages.add_message(request, messages.SUCCESS, "Added currency: {}!".format(form.cleaned_data['title']))
             return HttpResponseRedirect(get_next_link(request))
         context = {'form': form, 'go_next': get_next_link(request),
                    'page_title':'Create currency', 'button_title':'Back'}
@@ -382,7 +382,8 @@ class DeleteModelView(AuthUserMixin, View):
     MODEL_CHOISE = {
         'wallet': Wallet,
         'currency': Currency,
-        'familyAccess': FamilyAccess
+        'familyAccess': FamilyAccess,
+        'objective': Objective
     }
 
     def get(self, request, **kwargs):
@@ -490,4 +491,121 @@ class ProfileUpdate(AuthUserMixin, View):
             form = ProfileForm(instance=profile)
         context = {'form': form, 'go_next': get_next_link(request),
                    'page_title':'Update profile', 'button_title':'Back'}
+        return render(request, 'page_manager.html', context)
+
+# objective
+class ObjectiveCreate(AuthUserMixin, View):
+
+    def get(self, request):
+        form = ObjectiveForm(request.user, request.POST or None)
+        context = {'form': form, 'go_next': get_next_link(request),
+                   'page_title':'Create objective', 'button_title':'Back'}
+        return render(request, 'page_manager.html', context)
+
+    def post(self, request):
+        form = ObjectiveForm(request.user, request.POST or None)
+        if form.is_valid():
+            Objective.objects.create(user=request.user,
+                                  title=form.cleaned_data['title'],
+                                  currency=form.cleaned_data['currency'],
+                                  target_amount=form.cleaned_data['target_amount'],
+                                  now_amount=form.cleaned_data['now_amount'])
+            messages.add_message(request, messages.SUCCESS, "Added objective: {}!".format(form.cleaned_data['title']))
+            return HttpResponseRedirect(get_next_link(request))
+        context = {'form': form, 'go_next': get_next_link(request),
+                   'page_title':'Create objective', 'button_title':'Back'}
+        return render(request, 'page_manager.html', context)
+
+    pass
+
+class ObjectiveUpdate(AuthUserMixin, View):
+
+    def get(self, request, **kwargs):
+        if (Objective.objects.get(pk=kwargs.get('pk')).user == request.user):
+            objective = Objective.objects.get(user=request.user, pk=(kwargs.get('pk')))
+            form = ObjectiveForm(request.user, request.POST or None, instance=objective)
+            context = {'form': form, 'go_next': get_next_link(request),
+                       'page_title':'Update objective', 'button_title':'Back'}
+            return render(request, 'page_manager.html', context)
+        else:
+            messages.add_message(request,messages.WARNING,"Error!")
+            return HttpResponseRedirect(get_next_link(request))
+
+    def post(self, request, **kwargs):
+        objective = Objective.objects.get(user=request.user, pk=(kwargs.get('pk')))
+        form = ObjectiveForm(request.user, request.POST or None, instance=objective)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request, messages.SUCCESS,"Updated objective: {}".format(form.cleaned_data['title']))
+            return HttpResponseRedirect(get_next_link(request))
+        else:
+            form = CategoryForm(instance=objective)
+        context = {'form': form,'go_next': get_next_link(request),
+                   'page_title':'Update objective', 'button_title':'Back'}
+        return render(request, 'page_manager.html', context)
+
+class ObjectiveTransfer(AuthUserMixin, View):
+
+    def get(self, request, **kwargs):
+        if (Objective.objects.get(pk=kwargs.get('pk')).user == request.user):
+            objective = Objective.objects.get(pk=kwargs.get('pk'))
+            form = ObjectiveTransferForm(objective.currency, request.user, request.POST or None)
+            
+            messages.add_message(request, messages.SUCCESS,"Objective target money: {}".format(objective.target_amount))
+            messages.add_message(request, messages.SUCCESS,"Objective now money: {}".format(objective.now_amount))
+            context = {'form': form, 'go_next': get_next_link(request),
+                       'page_title':'Transfer money to Wallet', 'button_title':'Back'}
+            return render(request, 'page_manager.html', context)
+        else:
+            messages.add_message(request,messages.WARNING,"Error!")
+            return HttpResponseRedirect(get_next_link(request))
+
+    def post(self, request, **kwargs):
+        objective = Objective.objects.get(pk=kwargs.get('pk'))
+        form = ObjectiveTransferForm(objective.currency, request.user, request.POST or None)
+        if form.is_valid():
+            wallet = form.cleaned_data['wallets']
+            money = float(form.cleaned_data['money'])
+            if wallet.start_amount >= money:
+                if (objective.target_amount - objective.now_amount) >= money:
+                    objective_transfer_money(objective, wallet, money)
+                    messages.add_message(request, messages.SUCCESS,"{} {} transfered to {}".format(money,
+                                                                                                   wallet.currency.title,
+                                                                                                   objective.title))
+                    return HttpResponseRedirect(get_next_link(request))
+                else:
+                    messages.add_message(request, messages.WARNING,"Введена сумма, больше чем требуется!")
+            else:
+                messages.add_message(request, messages.WARNING,"Денег нет!")
+        messages.add_message(request, messages.SUCCESS,"Objective target money: {}".format(objective.target_amount))
+        messages.add_message(request, messages.SUCCESS,"Objective now money: {}".format(objective.now_amount))
+        context = {'form': form,'go_next': get_next_link(request),
+                   'page_title':'Transfer money to Wallet', 'button_title':'Back'}
+        return render(request, 'page_manager.html', context)
+
+# transfer money
+class MoneyTransfer(AuthUserMixin, View):
+
+    def get(self, request, **kwargs):
+        if (Wallet.objects.get(pk=kwargs.get('wallet_pk')).user == request.user):
+            form = MoneyTransferForm(kwargs.get('wallet_pk'), request.user, request.POST or None)
+            context = {'form': form, 'go_next': get_next_link(request),
+                       'page_title':'Transfer money to Wallet', 'button_title':'Back'}
+            return render(request, 'page_manager.html', context)
+        else:
+            messages.add_message(request,messages.WARNING,"Error!")
+            return HttpResponseRedirect(get_next_link(request))
+
+    def post(self, request, **kwargs):
+        form = MoneyTransferForm(kwargs.get('wallet_pk'), request.user, request.POST or None)
+        wallet_from = Wallet.objects.get(pk=kwargs.get('wallet_pk'))
+        if form.is_valid():
+            if wallet_from.start_amount >= float(form.cleaned_data['money']):
+                transfer_money(wallet_from, form.cleaned_data['wallets'], float(form.cleaned_data['money']))
+                messages.add_message(request, messages.SUCCESS,"Money transfered to {}".format(form.cleaned_data['wallets'].title))
+                return HttpResponseRedirect(get_next_link(request))
+            else:
+                messages.add_message(request, messages.WARNING,"Денег нет!")
+        context = {'form': form,'go_next': get_next_link(request),
+                   'page_title':'Transfer money to Wallet', 'button_title':'Back'}
         return render(request, 'page_manager.html', context)
