@@ -1,33 +1,38 @@
 {% extends 'home.html' %}
 {% block content %}
-<div class="container">
-    {% if messages %}
+
+{% if messages %}
+<div class="container message-container">
     {% for message in messages %}
-    <span class="message message_{{ message.tags }}">{{ message }}</span>
+    <span class="message message_{{ message.tags }} no-wrap">{{ message }}</span>
     {% endfor %}
-    {% endif %}
 </div>
-    <div class="title_name_block">
+{% endif %}
+
+<div class="container">
+    <div class="container-title-block">
         <p class="block-title">{{ page_title }}</p>
-        <div class="actions">            
+        <div class="block-actions">
             {% if go_next %}
-            <a class="button_round" href="{{ go_next }}">{{ button_title }}</a>
+            <a class="button-round button-yellow" href="{{ go_next }}">{{ button_title }}</a>
             {% endif %}
             {% if auth_check%}
             {% if auth_check == 1 %}
-            <a class="button_round" href="{% url 'registration' %}">{{ button_title }}</a>
+            <a class="button-round button-blue" href="{% url 'registration' %}">{{ button_title }}</a>
             {% else %}
-            <a class="button_round" href="{% url 'login' %}">{{ button_title }}</a>
+            <a class="button-round button-blue" href="{% url 'login' %}">{{ button_title }}</a>
             {% endif %}
             {% endif %}
         </div>
     </div>
     <hr>
-    <div class="container">
         <form action="" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <input class="button_round" type="submit" value="Save">
+            <div class="container-content-block search-block-content flex-column form-as-p">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input class="button-round button-green m-t-4 m-l-auto" type="submit" value="Save">
+            </div>
         </form>
-    </div>
+</div>
+
 {% endblock content %}

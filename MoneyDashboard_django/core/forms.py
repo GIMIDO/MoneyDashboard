@@ -86,7 +86,7 @@ class CategoryForm(forms.ModelForm):
 class WalletForm(forms.ModelForm):
 
     start_amount = forms.CharField(widget=forms.TextInput(
-        attrs={'min':'0.01','max': '9999999','type': 'number', 'step':'0.01'}))
+        attrs={'min':'-9999999','max': '9999999','type': 'number', 'step':'0.01'}))
 
     class Meta:
         model = Wallet
@@ -127,6 +127,7 @@ class FamilyAccessForm(forms.ModelForm):
 
 
 class ProfileForm(forms.ModelForm):
+    avatar = forms.ImageField(required=False, widget=forms.FileInput)
     class Meta:
         model = Profile
         fields = ['first_name', 'last_name', 'avatar', 'bio']

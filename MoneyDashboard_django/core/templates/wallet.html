@@ -1,104 +1,112 @@
 {% extends 'home.html' %}
 {% block content %}
+
 <div class="container message-container">
-    <p class="message">Wallet owner: {{ wallet.user.username }}</p>
-    <p class="message">Total amount: {{ total_amount }} {{ wallet.currency.title }}</p>
+    <p class="message message_success">Wallet owner: {{ wallet.user.username }}</p>
+    <p class="message message_success">Total amount: {{ total_amount }} {{ wallet.currency.title }}</p>
     {% if messages %}
     {% for message in messages %}
-    <span class="message message_{{ message.tags }}">{{ message }}</span>
+    <span class="message message_{{ message.tags }} no-wrap">{{ message }}</span>
     {% endfor %}
     {% endif %}
 </div>
 
-<div class="title_name_block">
+<div class="container">
+    <div class="container-title-block">
         {% if page_obj %}
-        <p class="block-title">All actions</p>
-        <span class="message info-message">{{ count }}</span>
+        <p class="block-title">{{ count }} actions</p>
         {% else %}
         <p class="block-title">No actions</p>
         {% endif %}
-        <div class="actions">
-            <a class="button_round" href="{% url 'transfer-wallet' wallet.pk %}?next={{ request.path }}">Transfer&nbspMoney</a>
-            <a class="button_round" href="{% url 'create-action' wallet.pk %}?next={{ request.path }}">Create&nbspAction</a>
-            <a class="button_round" href="{% url 'category-manager' wallet.pk %}">Category&nbspManager</a>
+        <div class="block-actions">
+            <a class="button-round button-green" href="{% url 'create-action' wallet.pk %}?next={{ request.path }}">Create&nbspAction</a>
+            <a class="button-round button-blue" href="{% url 'category-manager' wallet.pk %}">Category&nbspManager</a>
             {% if wallet.user == request.user %}
-                <a class="button_round" href="{% url 'wallet-access' wallet.pk %}">Access Manager</a>
+                <a class="button-round button-blue" href="{% url 'transfer-wallet' wallet.pk %}?next={{ request.path }}">Transfer&nbspMoney</a>
+                <a class="button-round button-blue" href="{% url 'wallet-access' wallet.pk %}">Access Manager</a>
             {% endif %}
-            <a class="button_round" href="{% url 'home' %}">Home</a>
+            <a class="button-round button-yellow" href="{% url 'home' %}">Home</a>
         </div>
     </div>
     <hr>
-    <div class="container">
+    <div class="container-content-block">
         {% for action in page_obj %}
-        <div class="card ">
-            
+        <div class="block-item">
             {% if action.user == request.user %}
-            <a class="name" href="{% url 'update-action' wallet.pk action.pk %}?next={{ request.path }}"><span class="owner-title">{{ action.user.username }}</span><i>{{ action.category.title }}</i>{{ action.title }}
+            <a class="item-title" href="{% url 'update-action' wallet.pk action.pk %}?next={{ request.path }}">
+                <span class="only-title">{{ action.user.username }} | {{ action.category.title }}</span>
+                <span class="item-name-title">{{ action.title }}</span>
             </a>
             {% else %}
-            <p class="name_no_hover"><span class="owner-title">{{ action.user.username }}</span><i>{{ action.category.title }}</i>{{ action.title }}</p>
+            <p class="item-title no-hover"><span class="owner-title">{{ action.user.username }}</span><i>{{ action.category.title }}</i>{{ action.title }}</p>
             {% endif %}
-            <div class="list">
-                {% if action.action_type == 'increase' %}
-                <p class="money increase">{{ action.money }} <span>{{ action.wallet.currency.title }}</span></p>
-                {% else %}
-                <p class="money spending">{{ action.money }} <span>{{ action.wallet.currency.title }}</span></p>
-                {% endif %}
-                <p class="date">{{ action.date }}</p>
-                {% if wallet.user == request.user %}
-                <a class="button_round delete" href="{% url 'delete-action' wallet_pk=wallet.pk pk=action.pk %}?next={{ request.path }}">Delete</a>
-                {% else %}
-                    {% if action.user == request.user %}
-                    <a class="button_round delete" href="{% url 'delete-action' wallet_pk=wallet.pk pk=action.pk %}?next={{ request.path }}">Delete</a>
-                    {% endif %}
-                {% endif %}
+            <div class="item-actions{% if action.action_type == 'increase' %} increase{% else %} spending{% endif %}">
+                <p class="action-item">{{ action.money }} <span>{{ action.wallet.currency.title }}</span></p>
+                <p class="action-item">{{ action.date }}</p>
             </div>
+            {% if wallet.user == request.user %}
+            <a class="item-delete button-round button-red" href="{% url 'delete-action' wallet_pk=wallet.pk pk=action.pk %}?next={{ request.path }}">Delete</a>
+            {% else %}
+            {% if action.user == request.user %}
+            <a class="item-delete button-round button-red" href="{% url 'delete-action' wallet_pk=wallet.pk pk=action.pk %}?next={{ request.path }}">Delete</a>
+            {% endif %}
+            {% endif %}
         </div>
-        
         {% endfor %}
-    </div>
 
-    <div class="container">
         {% if page_obj.has_other_pages %}
         <span class="pagination">
             {% if page_obj.has_previous %}
-            <a href="?page=1" class="button_round">First</a>
-            <a href="?page={{ page_obj.previous_page_number }}" class="button_round">&laquo;</a>
+            <a href="?page=1" class="button-round button-yellow">First</a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="button-round button-yellow">&laquo;</a>
             {% endif %}
-            <span>
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            <span class="page-padding">
+                {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
             </span>
             {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}" class="button_round">&raquo;</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}" class="button_round">Last</a>
+            <a href="?page={{ page_obj.next_page_number }}" class="button-round button-yellow">&raquo;</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="button-round button-yellow">Last</a>
             {% endif %}
         </span>
         {% endif %}
     </div>
-    
-    {% if page_obj %}
-    <div class="title_name_block">
+</div>
+
+{% if page_obj %}
+<form class="" action="{% url 'search-results' wallet.pk %}?next={{ request.path }}" method="get">
+<div class="container">
+    <div class="container-title-block">
         <p class="block-title">Search</p>
-        <div class="actions">
-            <form class="search_form" action="{% url 'search-results' wallet.pk %}?next={{ request.path }}" method="get">
-                <p class="search_p">category</p>
+        <div class="block-actions">
+            <input id="" class="button-round button-green" type="submit" value="Search">
+        </div>
+    </div>
+    <hr>
+    <div class="container-content-block search-block-content">
+                <div class="search-block-item search-item">
+                <p class="search-p">category</p>
                 <select class="long_select" name="category" type="text">
                     <option selected disabled>Select category</option>
                     {% for category in categories %}
                     <option value="{{ category.id }}">{{ category.title }}</option>
                     {% endfor %}
                 </select>
-                <p class="search_p">from</p>
-                <input name="from" type="date" placeholder="Date from...">
-                <p class="search_p">to</p>
-                <input name="to" type="date" placeholder="Date to...">
-                <input id="button_round" type="submit" value="Search">
-            </form>
-        </div>
-    </div>
-    <hr>
-    {% endif %}
+                </div>
+                <div class="search-block-item search-item">
+                    <p class="search-p">from</p>
+                    <input name="from" type="date" placeholder="Date from...">
+                </div>
+                <div class="search-block-item search-item">
+                    <p class="search-p">to</p>
+                    <input name="to" type="date" placeholder="Date to...">
+                </div>
 
+    </div>
+</div>
+</form>
+{% endif %}
+
+<div style="display: none;">
     <div class="title_name_block">
         <p class="block-title">Download actions</p>
     </div>
@@ -106,4 +114,6 @@
     <div class="container">
         <a class="button_round" href="{% url 'download' wallet.pk %}">Download all actions as JSON</a>
     </div>
+</div>
+
     {% endblock content %}
