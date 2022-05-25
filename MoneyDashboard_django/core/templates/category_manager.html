@@ -19,7 +19,7 @@
     <hr>
     <div class="container-content-block">
         {% for category in page_obj %}
-        <div class="block-item">
+        <div class="block-item mobile-column">
             {% if wallet.user == request.user %}
                 <a class="item-title" href="{% url 'update-category' wallet.pk category.pk %}?next={{ request.get_full_path|urlencode }}">
                     <span class="only-title">{{ category.user }}</span>
@@ -28,7 +28,7 @@
                     </span>
                 </a>
                 <div class="item-actions">
-                    <a class="item-delete button-round button-red" href="{% url 'delete-category' wallet_pk=wallet.pk pk=category.pk %}?next={{ request.get_full_path|urlencode }}">Delete</a>
+                    <a class="button-round button-red" href="{% url 'delete-category' wallet_pk=wallet.pk pk=category.pk %}?next={{ request.get_full_path|urlencode }}">Delete</a>
                 </div>
             {% else %}
                 {% if category.user == request.user %}
@@ -39,7 +39,7 @@
                     </span>
                 </a>
                 <div class="item-actions">
-                    <a class="item-delete button-round button-red" href="{% url 'delete-category' wallet_pk=wallet.pk pk=category.pk %}?next={{ request.get_full_path|urlencode }}">Delete</a>
+                    <a class="button-round button-red" href="{% url 'delete-category' wallet_pk=wallet.pk pk=category.pk %}?next={{ request.get_full_path|urlencode }}">Delete</a>
                 </div>
                 {% else %}
                 <p class="item-title">

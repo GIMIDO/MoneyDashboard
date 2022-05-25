@@ -1,9 +1,12 @@
 {% extends 'home.html' %}
+
+
+
 {% block content %}
 
 <div class="container message-container">
-    <p class="message message_success">Wallet owner: {{ wallet.user.username }}</p>
-    <p class="message message_success">Total amount: {{ total_amount }} {{ wallet.currency.title }}</p>
+    <p class="message message_success m-r">Wallet owner: {{ wallet.user.username }}</p>
+    <p class="message message_success m-r">Total amount: {{ total_amount }} {{ wallet.currency.title }}</p>
     {% if messages %}
     {% for message in messages %}
     <span class="message message_{{ message.tags }} no-wrap">{{ message }}</span>
@@ -12,45 +15,44 @@
 </div>
 
 <div class="container">
-    <div class="container-title-block">
+    <div class="container-title-block mobile-column">
         {% if page_obj %}
         <p class="block-title">{{ count }} actions</p>
         {% else %}
         <p class="block-title">No actions</p>
         {% endif %}
         <div class="block-actions">
-            <a class="button-round button-green" href="{% url 'create-action' wallet.pk %}?next={{ request.path }}">Create&nbspAction</a>
-            <a class="button-round button-blue" href="{% url 'category-manager' wallet.pk %}">Category&nbspManager</a>
+            <a class="button-round button-green" href="{% url 'create-action' wallet.pk %}?next={{ request.path }}">New&nbspAction</a>
+            <a class="button-round button-blue m-l" href="{% url 'category-manager' wallet.pk %}">Categories</a>
             {% if wallet.user == request.user %}
-                <a class="button-round button-blue" href="{% url 'transfer-wallet' wallet.pk %}?next={{ request.path }}">Transfer&nbspMoney</a>
-                <a class="button-round button-blue" href="{% url 'wallet-access' wallet.pk %}">Access Manager</a>
+                <a class="button-round button-blue m-l" href="{% url 'transfer-wallet' wallet.pk %}?next={{ request.path }}">Transfer</a>
+                <a class="button-round button-blue m-l" href="{% url 'wallet-access' wallet.pk %}">Access</a>
             {% endif %}
-            <a class="button-round button-yellow" href="{% url 'home' %}">Home</a>
+            <a class="button-round button-yellow m-l" href="{% url 'home' %}">Home</a>
         </div>
     </div>
     <hr>
     <div class="container-content-block">
         {% for action in page_obj %}
-        <div class="block-item">
+        <div class="block-item mobile-column">
             {% if action.user == request.user %}
             <a class="item-title" href="{% url 'update-action' wallet.pk action.pk %}?next={{ request.path }}">
-                <span class="only-title">{{ action.user.username }} | {{ action.category.title }}</span>
-                <span class="item-name-title">{{ action.title }}</span>
+                {{ action.user.username }} | {{ action.category.title }} | {{ action.title }}
             </a>
             {% else %}
-            <p class="item-title no-hover"><span class="owner-title">{{ action.user.username }}</span><i>{{ action.category.title }}</i>{{ action.title }}</p>
+            <p class="item-title no-hover">
+                {{ action.user.username }} | {{ action.category.title }}{{ action.title }}</p>
             {% endif %}
-            <div class="item-actions{% if action.action_type == 'increase' %} increase{% else %} spending{% endif %}">
-                <p class="action-item">{{ action.money }} <span>{{ action.wallet.currency.title }}</span></p>
-                <p class="action-item">{{ action.date }}</p>
+            <div class="item-actions">
+                <p class="button-round button-{% if action.action_type == 'increase' %}green-c{% else %}red-c{% endif %}">{{ action.money }} {{ action.wallet.currency.title }} | {{ action.date }}</p>
+                {% if wallet.user == request.user %}
+                <a class="button-round button-red m-l" href="{% url 'delete-action' wallet_pk=wallet.pk pk=action.pk %}?next={{ request.path }}">Delete</a>
+                {% else %}
+                {% if action.user == request.user %}
+                <a class="button-round button-red m-l" href="{% url 'delete-action' wallet_pk=wallet.pk pk=action.pk %}?next={{ request.path }}">Delete</a>
+                {% endif %}
+                {% endif %}
             </div>
-            {% if wallet.user == request.user %}
-            <a class="item-delete button-round button-red" href="{% url 'delete-action' wallet_pk=wallet.pk pk=action.pk %}?next={{ request.path }}">Delete</a>
-            {% else %}
-            {% if action.user == request.user %}
-            <a class="item-delete button-round button-red" href="{% url 'delete-action' wallet_pk=wallet.pk pk=action.pk %}?next={{ request.path }}">Delete</a>
-            {% endif %}
-            {% endif %}
         </div>
         {% endfor %}
 
@@ -73,36 +75,33 @@
 </div>
 
 {% if page_obj %}
-<form class="" action="{% url 'search-results' wallet.pk %}?next={{ request.path }}" method="get">
-<div class="container">
+<form class="container" action="{% url 'search-results' wallet.pk %}?next={{ request.path }}" method="get">
     <div class="container-title-block">
         <p class="block-title">Search</p>
         <div class="block-actions">
-            <input id="" class="button-round button-green" type="submit" value="Search">
+            <input class="button-round button-green" type="submit" value="Search">
         </div>
     </div>
     <hr>
     <div class="container-content-block search-block-content">
-                <div class="search-block-item search-item">
-                <p class="search-p">category</p>
-                <select class="long_select" name="category" type="text">
-                    <option selected disabled>Select category</option>
-                    {% for category in categories %}
-                    <option value="{{ category.id }}">{{ category.title }}</option>
-                    {% endfor %}
-                </select>
+                <div class="search-block-item">
+                    <p class="search-p">category</p>
+                    <select name="category" type="text">
+                        <option selected disabled>Select category</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.title }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
-                <div class="search-block-item search-item">
+                <div class="search-block-item m-l">
                     <p class="search-p">from</p>
                     <input name="from" type="date" placeholder="Date from...">
                 </div>
-                <div class="search-block-item search-item">
+                <div class="search-block-item m-l">
                     <p class="search-p">to</p>
                     <input name="to" type="date" placeholder="Date to...">
                 </div>
-
     </div>
-</div>
 </form>
 {% endif %}
 
@@ -115,5 +114,122 @@
         <a class="button_round" href="{% url 'download' wallet.pk %}">Download all actions as JSON</a>
     </div>
 </div>
+
+{% if page_obj %}
+<div class="container">
+    <div class="container-title-block">
+        <p class="block-title">Graphics</p>
+    </div>
+    <hr>
+    <div class="canvas-container">
+        <canvas id="ChartInc"></canvas>
+        <canvas id="ChartSpn"></canvas>
+    </div>
+    <hr>
+
+    <div class="container-content-block">
+        {% for item in t_g %}
+        <div class="block-item mobile-column">
+            <a class="item-title" href="{% url 'search-results' wallet.pk %}?category={{item.category_id}}&from=&to=">
+                {{ item.title }} {{ item.category_id }}
+            </a>
+            <div class="item-actions">
+                <span class="button-round button-blue-c">Total: {{ item.total }} {{ wallet.currency.title }}</span>
+                <span class="button-round button-green-c m-l">INC: {{ item.increase }} {{ wallet.currency.title }}</span>
+                <span class="button-round button-red-c m-l">SPD: {{ item.spending }} {{ wallet.currency.title }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endif %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    
+    const data = {
+    labels: [{% for item in t_g %}'{{ item.title }}',{% endfor %}],
+    datasets: [{
+        label: 'Increase',
+        data: [{% for item in t_g %}{{ item.increase }},{% endfor %}],
+        borderColor: ['rgb(26, 85, 29)'],
+        backgroundColor: ['rgb(26, 85, 29, 0.75)']
+    }],
+};
+    const data1 = {
+    labels: [{% for item in t_g %}'{{ item.title }}',{% endfor %}],
+    datasets: [
+    {
+        label: 'Spending',
+        data: [{% for item in t_g %}{{ item.spending }},{% endfor %}],
+        borderColor: ['rgb(85, 26, 26)'],
+        backgroundColor: ['rgb(85, 26, 26, 0.75)']
+    }
+    ]};
+  
+    const config = {
+        type: 'bar',
+        data: data,
+        options: {
+            indexAxis: 'y',
+            responsive: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        font: {
+                            size: 16,
+                            weight: 'bold',
+                        },
+
+                    }
+                }
+            }
+        },
+    };
+    const config1 = {
+        type: 'bar',
+        data: data1,
+        options: {
+            indexAxis: 'y',
+            responsive: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        font: {
+                            size: 16,
+                            weight: 'bold',
+                        },
+
+                    }
+                }
+            }
+        },
+    };
+    Chart.defaults.font.family = 'Source Sans Pro';
+
+    function device_width_chart(x) {
+        if (x.matches) { // If media query matches
+            Chart.defaults.font.size = 32;
+        } else {
+            Chart.defaults.font.size = 16;
+        }
+      }
+      var x = window.matchMedia("(max-device-width: 767px)")
+      device_width_chart(x)
+      x.addListener(device_width_chart)
+
+    const ChartInc = new Chart(
+        document.getElementById('ChartInc'),
+        config
+        );
+    const ChartSpn = new Chart(
+            document.getElementById('ChartSpn'),
+            config1
+            );
+
+  </script>
+{%endblock scripts%}
 
     {% endblock content %}

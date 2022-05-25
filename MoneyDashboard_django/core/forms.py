@@ -56,6 +56,8 @@ class RegistrationForm(forms.ModelForm):
 
 class ActionForm(forms.ModelForm):
 
+    title = forms.CharField(widget=forms.TextInput(
+        attrs={'maxlength':'150', 'type':'text'}))
     money = forms.CharField(widget=forms.TextInput(
         attrs={'min':'0.01','max': '9999999','type': 'number', 'step':'0.01'}))
 
@@ -74,6 +76,9 @@ class ActionForm(forms.ModelForm):
 
 class CategoryForm(forms.ModelForm):
 
+    title = forms.CharField(widget=forms.TextInput(
+        attrs={'maxlength':'25', 'type':'text'}))
+
     class Meta:
         model = Action
         fields = ['title']
@@ -85,6 +90,8 @@ class CategoryForm(forms.ModelForm):
 
 class WalletForm(forms.ModelForm):
 
+    title = forms.CharField(widget=forms.TextInput(
+        attrs={'maxlength':'255', 'type':'text'}))
     start_amount = forms.CharField(widget=forms.TextInput(
         attrs={'min':'-9999999','max': '9999999','type': 'number', 'step':'0.01'}))
 
@@ -99,6 +106,9 @@ class WalletForm(forms.ModelForm):
 
 
 class CurrencyForm(forms.ModelForm):
+
+    title = forms.CharField(widget=forms.TextInput(
+        attrs={'maxlength':'3', 'type':'text'}))
 
     class Meta:
         model = Currency
@@ -118,6 +128,10 @@ class FamilyAccessForm(forms.ModelForm):
         model = FamilyAccess
         fields = ['user1']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['user1'].label = 'Username'
+
     def clean(self):
         test_user = self.cleaned_data['user1']
         print(test_user)
@@ -128,6 +142,8 @@ class FamilyAccessForm(forms.ModelForm):
 
 class ProfileForm(forms.ModelForm):
     avatar = forms.ImageField(required=False, widget=forms.FileInput)
+    bio = forms.CharField(widget=forms.TextInput(
+        attrs={'type':'text'}))
     class Meta:
         model = Profile
         fields = ['first_name', 'last_name', 'avatar', 'bio']
@@ -137,6 +153,10 @@ class ProfileForm(forms.ModelForm):
 
 
 class ObjectiveForm(forms.ModelForm):
+
+    title = forms.CharField(widget=forms.TextInput(
+        attrs={'maxlength':'255', 'type':'text'}))
+
     class Meta:
         model = Objective
         fields = ['title', 'currency', 'target_amount', 'now_amount']

@@ -13,7 +13,7 @@ User = get_user_model()
 class Currency(models.Model):
 
     user = models.ForeignKey(User,verbose_name='User',on_delete=models.CASCADE)
-    title = models.CharField(verbose_name='Currency',max_length=255)
+    title = models.CharField(verbose_name='Currency',max_length=3)
 
     def __str__(self) -> str:
         return f'{self.title}'
@@ -32,7 +32,7 @@ class Wallet(models.Model):
 
 class Category(models.Model):
 
-    title = models.CharField(verbose_name='Category',max_length=255)
+    title = models.CharField(verbose_name='Category', max_length=25)
     user = models.ForeignKey(User,verbose_name='User',on_delete=models.CASCADE)
     wallet = models.ForeignKey(Wallet,verbose_name='Wallet',on_delete=models.CASCADE)
 

@@ -9,7 +9,7 @@ from .models import *
 class AuthUserMixin(object):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            messages.add_message(request, messages.INFO, 'Сначала войдите в аккаунт!')
+            messages.add_message(request, messages.INFO, 'Log in first!')
             return redirect('login')
         return super().dispatch(request, *args, **kwargs)
 

@@ -21,12 +21,12 @@
     <div class="container-content-block">
         {% if t_wallet %}
         {% for t_walle in t_wallet %}
-        <div class="block-item">
+        <div class="block-item mobile-column">
             <a class="item-title" href="{% url 'profile' t_walle.user.username %}?next={{ request.path }}">
                 <span class="item-name-title p-l-8">{{ t_walle.user.username }}</span>
             </a>
             <div class="item-actions">
-                <a class="item-delete button-round button-red" href="{% url 'delete-access' wallet_pk=t_walle.wallet.pk user=t_walle.user.username %}?next={{ request.path }}">Delete</a>
+                <a class="button-round button-red" href="{% url 'delete-access' wallet_pk=t_walle.wallet.pk user=t_walle.user.username %}?next={{ request.path }}">Delete</a>
             </div>
         </div>
         {% endfor %}

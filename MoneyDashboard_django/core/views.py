@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import View
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth import authenticate, login, logout
@@ -9,6 +9,8 @@ from .models import *
 from .forms import *
 from .utils import *
 from .mixins import *
+
+from datetime import datetime, timedelta
 
 # home
 class HomePage(AuthUserMixin, View):
@@ -92,6 +94,15 @@ class SearchResultsView(AuthUserMixin, View):
             q_category = self.request.GET.get("category")
             actions = search_actions(kwargs.get('wallet_pk'), q_from, q_to, q_category)
 
+            if self.request.GET.get("category"):
+                categories = Category.objects.filter(pk=q_category)
+                print(q_category)
+                t_g = total_graph(actions, categories)
+            else:
+                categories = Category.objects.filter(wallet=(kwargs.get('wallet_pk')))
+                t_g = total_graph(actions, categories)
+
+
             if q_category:
                 category_out = Category.objects.get(id=q_category)
             else:
@@ -104,7 +115,7 @@ class SearchResultsView(AuthUserMixin, View):
             context = {
                 'q_from': q_from, 'q_to': q_to, 'q_category': q_category, 'category_out': category_out,
                 'button_url': 'wallet-page', 'b_u2': kwargs.get('wallet_pk'), 'button_title': 'Back',
-                'wallet': wallet, 'total_amount': calc_amount(actions), 'page_obj': page_obj}
+                'wallet': wallet, 'total_amount': calc_amount(actions), 'page_obj': page_obj, 't_g': t_g}
             return render(request, 'search_actions.html', context)
         else:
             messages.add_message(request, messages.WARNING, "Error!")
@@ -134,9 +145,11 @@ class DownloadJSON(AuthUserMixin, View):
 class CreateAction(AuthUserMixin, View):
 
     def get(self, request, **kwargs):
-        wallet = Wallet.objects.get(pk=kwargs.get('wallet_pk'))
+        # ..........................................
+        wallet = get_object_or_404(Wallet, pk=kwargs.get('wallet_pk'))
         if FamilyAccess.objects.filter(user=request.user, wallet=wallet) or wallet.user == request.user:
             form = ActionForm(kwargs.get('wallet_pk'), request.POST or None)
+            messages.add_message(request, messages.SUCCESS,"Title length: {} symbols".format('150'))
             context = {'form': form, 'go_next': get_next_link(request),
                        'page_title':'Create action', 'button_title':'Back'}
             return render(request, 'page_manager.html', context)
@@ -170,6 +183,7 @@ class UpdateAction(AuthUserMixin, View):
         if (Action.objects.get(pk=kwargs.get('pk')).user == request.user) or (Wallet.objects.get(pk=kwargs.get('wallet_pk')).user == request.user):
             action = Action.objects.get(pk=(kwargs.get('pk')))
             form = ActionForm(kwargs.get('wallet_pk'), request.POST or None, instance=action)
+            messages.add_message(request, messages.SUCCESS,"Title length: {} symbols".format('255'))
             context = {'form': form,'go_next': get_next_link(request),
                        'page_title':'Update action', 'button_title':'Back'}
             return render(request, 'page_manager.html', context)
@@ -200,6 +214,8 @@ class CreateCategory(AuthUserMixin, View):
         if FamilyAccess.objects.filter(user=request.user, wallet=wallet) or wallet.user == request.user:
             form = CategoryForm(request.POST or None)
             context = {'form': form, 'go_next': get_next_link(request), 'page_title':'Create category', 'button_title':'Back'}
+
+            messages.add_message(request, messages.SUCCESS,"Title length: {} symbols".format('25'))
             return render(request, 'page_manager.html', context)
         else:
             messages.add_message(request, messages.WARNING, "Error!")
@@ -207,8 +223,6 @@ class CreateCategory(AuthUserMixin, View):
 
 
     def post(self, request, **kwargs):
-
-
         wallet = Wallet.objects.get(pk=kwargs.get('wallet_pk'))
         form = CategoryForm(request.POST or None)
         if form.is_valid():
@@ -225,6 +239,7 @@ class UpdateCategory(AuthUserMixin, View):
         if (Category.objects.get(pk=kwargs.get('pk')).user == request.user) or (Wallet.objects.get(pk=kwargs.get('wallet_pk')).user == request.user):
             category = Category.objects.get(pk=kwargs.get('pk'))
             form = CategoryForm(request.POST or None, instance=category)
+            messages.add_message(request, messages.SUCCESS,"Title length: {} symbols".format('25'))
             context = {'form': form, 'go_next': get_next_link(request),
                        'page_title':'Update category', 'button_title':'Back'}
             return render(request, 'page_manager.html', context)
@@ -316,16 +331,19 @@ class UpdateWallet(AuthUserMixin, View):
 class WalletView(AuthUserMixin, View):
 
     def get(self, request, **kwargs):
-        wallet = Wallet.objects.get(pk=kwargs.get('wallet_pk'))
+        wallet = get_object_or_404(Wallet, pk=kwargs.get('wallet_pk'))
         if FamilyAccess.objects.filter(user=request.user, wallet=wallet) or wallet.user == request.user:
             actions = Action.objects.filter(wallet=(kwargs.get('wallet_pk'))).order_by('-date', '-created_at')
             categories = Category.objects.filter(wallet=(kwargs.get('wallet_pk')))
+            
+            last7 = actions.filter(date__gte=datetime.now()-timedelta(days=2))
+            last30 = actions.filter(date__gte=datetime.now()-timedelta(days=29))
 
             paginator = Paginator(actions, 10)
             page_number = request.GET.get('page')
             page_obj = paginator.get_page(page_number)
 
-            context = {'wallet': wallet, 'total_amount': wallet.start_amount, 'page_obj': page_obj, 'count': actions.count, 'categories': categories}
+            context = {'wallet': wallet, 'total_amount': wallet.start_amount, 'page_obj': page_obj, 'count': actions.count, 'categories': categories, 'last7': last7, 'last30': last30, 't_g': total_graph(actions, categories)}
             return render(request, 'wallet.html', context)
         else:
             messages.add_message(request, messages.WARNING, "Error!")
@@ -461,7 +479,6 @@ class ProfileView(AuthUserMixin, View):
     def get(self, request, **kwargs):
         user_profile = User.objects.get(username=kwargs.get('username'))
         profile = Profile.objects.get(user=user_profile)
-        # messages.add_message(request, messages.SUCCESS, "User profile: {}".format(kwargs.get('username')))
 
         context = {'go_next': get_next_link(request), 'profile': profile,
                    'button_title':'Back'}

@@ -83,3 +83,23 @@ def objective_transfer_money(objective, wallet, money):
     wallet.save()
     objective.now_amount += money
     objective.save()
+
+
+def total_graph(actions, categories):
+    total_amount_graph = []
+    for category in categories:
+        filtered = actions.filter(category=category.id)
+        total_amount = 0
+        increase = 0
+        spending = 0
+        for action in filtered:
+            if action.action_type == "increase":
+                total_amount += action.money
+                increase += action.money
+            else:
+                total_amount -= action.money
+                spending += action.money
+        item = {'title': category.title, 'total': total_amount, 'increase': increase, 'spending': spending, 'category_id': category.pk}
+
+        total_amount_graph.append(item)
+    return total_amount_graph

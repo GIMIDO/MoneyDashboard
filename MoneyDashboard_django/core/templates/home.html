@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+    <head>
     <meta charset="UTF-8">
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?version=6">
 </head>
 <body>
     <header class="header">
@@ -11,8 +11,9 @@
             <a class="block-title header-title" href="{% url 'home' %}">Goose</a>
             <div class="block-actions">
                 {% if request.user.is_authenticated %}
-                <a class="button-round button-blue" href="{% url 'profile' request.user %}">{{ request.user.username }}</a>
-                <a class="button-round button-red" href="{% url 'sign-out' %}">Sign Out</a>
+                <a class="button-round button-yellow" href="{% url 'home' %}">Home</a>
+                <a class="button-round button-blue m-l" href="{% url 'profile' request.user %}">Profile</a>
+                <a class="button-round button-red m-l" href="{% url 'sign-out' %}">Sign&nbspOut</a>
                 {% endif %}
             </div>
         </div>
@@ -21,42 +22,18 @@
 
     {% block content %}
 
+    {% if messages %}
     <div class="container message-container">
-        {% if messages %}
         {% for message in messages %}
         <span class="message message_{{ message.tags }}">{{ message }}</span>
         {% endfor %}
-        {% endif %}
     </div>
+    {% endif %}
 
+    {% if currencies %}
     <div class="container">
         <div class="container-title-block">
-            <p class="block-title">
-                Currencys
-            </p>
-            <div class="block-actions">
-                <a class="button-round button-green" href="{% url 'create-currency' %}?next={{ request.path }}">Create&nbspCurrency</a>
-            </div>
-        </div>
-        <hr>
-        <div class="container-content-block">
-            {% for currency in currencies %}
-            <div class="block-item">
-                <a class="item-title" href="{% url 'update-currency' currency.pk %}?next={{ request.get_full_path|urlencode }}"><span class="item-name-title p-l-8">{{ currency.title }}</span></a>
-                <div class="item-actions">
-                    <a class="item-delete button-round button-red" href="{% url 'delete-model' pk=currency.pk model='currency' %}?next={{ request.get_full_path|urlencode }}">Delete</a>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-
-
-    <div class="container">
-        <div class="container-title-block">
-            <p class="block-title">
-                Wallets: {{ wallets.count }}
-            </p>
+            <p class="block-title">Wallets: {{ wallets.count }}</p>
             <div class="block-actions">
                 <a class="button-round button-green" href="{% url 'create-wallet' %}?next={{ request.path }}">Create&nbspWallet</a>
             </div>
@@ -64,52 +41,42 @@
         <hr>
         <div class="container-content-block">
             {% for wallet in wallets %}
-            <div class="block-item">
+            <div class="block-item mobile-column">
                 <a class="item-title" href="{% url 'wallet-page' wallet_pk=wallet.pk %}">
-                    <span class="only-title p-l-8">{{ wallet.title }}</span>
-                    <span class="item-name-title">{{ wallet.start_amount }} {{ wallet.currency.title }}</span></a>
+                    {{ wallet.title }}
+                </a>
                 <div class="item-actions">
-                    <a class="button-round button-yellow m-r-4" href="{% url 'update-wallet' wallet_pk=wallet.pk %}?next={{ request.path }}">Update</a>
-                    <a class="item-delete button-round button-red" href="{% url 'delete-model' pk=wallet.pk model='wallet' %}?next={{ request.path }}">Delete</a>
+                    <p class="button-round button-blue-c">{{ wallet.start_amount }} {{ wallet.currency.title }}</p>
+                    <a class="button-round button-yellow m-l" href="{% url 'update-wallet' wallet_pk=wallet.pk %}?next={{ request.path }}">Update</a>
+                    <a class="button-round button-red m-l" href="{% url 'delete-model' pk=wallet.pk model='wallet' %}?next={{ request.path }}">Delete</a>
                 </div>
             </div>
             {% endfor %}
         </div>
     </div>
 
-
     {% if f_wallets %}
     <div class="container">
         <div class="container-title-block">
-            <p class="block-title">
-                Family Access Wallets
-            </p>
-
+            <p class="block-title">Family Access Wallets</p>
         </div>
         <hr>
         <div class="container-content-block">
             {% for f_wallet in f_wallets %}
-            <div class="block-item">
+            <div class="block-item mobile-column">
                 <a class="item-title" href="{% url 'wallet-page' wallet_pk=f_wallet.wallet.pk %}">
-                    <span class="only-title">
-                        {{ f_wallet.wallet.user.username }} | {{ f_wallet.wallet.title }}
-                    </span>
-                    <span class="item-name-title">
-                         {{ f_wallet.wallet.start_amount }} {{ f_wallet.wallet.currency.title }}
-                    </span>
+                    {{ f_wallet.wallet.user.username }} | {{ f_wallet.wallet.title }}
                 </a>
+                <p class="button-round button-blue-c">{{ f_wallet.wallet.start_amount }} {{ f_wallet.wallet.currency.title }}</p>
             </div>
             {% endfor %}
         </div>
     </div>
     {% endif %}
 
-
     <div class="container">
         <div class="container-title-block">
-            <p class="block-title">
-                Objectives: {{ objectives.count }}
-            </p>
+            <p class="block-title">Objectives: {{ objectives.count }}</p>
             <div class="block-actions">
                 <a class="button-round button-green" href="{% url 'objective-create' %}?next={{ request.path }}">Create&nbspObjective</a>
             </div>
@@ -117,26 +84,44 @@
         <hr>
         <div class="container-content-block">
             {% for objective in objectives %}
-            <div class="block-item">
+            <div class="block-item mobile-column">
                 <a class="item-title" href="{% url 'objective-update' objective.pk %}?next={{ request.path }}">
-                    <span class="only-title">
-                        {{ objective.title }}
-                    </span>
-                    <span class="item-name-title">
-                         {{objective.now_amount}}/{{objective.target_amount}} {{objective.currency.title}}
-                    </span>
+                    {{ objective.title }}
                 </a>
                 <div class="item-actions">
-                    <a class="button-round button-yellow m-r-4" href="{% url 'objective-transfer' pk=objective.pk %}?next={{ request.path }}">Transfer Money</a>
-                    <a class="item-delete button-round button-red" href="{% url 'delete-model' pk=objective.pk model='objective' %}?next={{ request.path }}">Delete</a>
+                    <p class="button-round button-blue-c">{{objective.now_amount}}/{{objective.target_amount}} {{objective.currency.title}}</p>
+                    <a class="button-round button-yellow m-l" href="{% url 'objective-transfer' pk=objective.pk %}?next={{ request.path }}">Transfer Money</a>
+                    <a class="button-round button-red m-l" href="{% url 'delete-model' pk=objective.pk model='objective' %}?next={{ request.path }}">Delete</a>
                 </div>
             </div>
             {% endfor %}
         </div>
     </div>
+    {% endif %}
 
+    <div class="container">
+        <div class="container-title-block">
+            <p class="block-title">Currencys</p>
+            <div class="block-actions">
+                <a class="button-round button-green" href="{% url 'create-currency' %}?next={{ request.path }}">Create&nbspCurrency</a>
+            </div>
+        </div>
+        <hr>
+        <div class="container-content-block">
+            {% for currency in currencies %}
+            <div class="block-item mobile-column">
+                <a class="item-title" href="{% url 'update-currency' currency.pk %}?next={{ request.get_full_path|urlencode }}">
+                    {{ currency.title }}
+                </a>
+                <div class="item-actions">
+                    <a class="button-round button-red" href="{% url 'delete-model' pk=currency.pk model='currency' %}?next={{ request.get_full_path|urlencode }}">Delete</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
     {% endblock content %}
-
     </main>
+
 </body>
 </html>
