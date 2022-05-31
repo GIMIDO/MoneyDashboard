@@ -1,199 +1,238 @@
-{% extends "home.html" %}
-{% block content %}
+{% extends "home.html" %} {% block content %}
 <div class="container message-container">
-    <p class="message message_success">Amount of this period {{ total_amount }} BYN</p>
-    {% if messages %}
-    {% for message in messages %}
-    <span class="message message_{{ message.tags }} no-wrap">{{ message }}</span>
-    {% endfor %}
-    {% endif %}
+  <p class="message message_success">
+    Amount of this period {{ total_amount }} BYN
+  </p>
+  {% if messages %} {% for message in messages %}
+  <span class="message message_{{ message.tags }} no-wrap">{{ message }}</span>
+  {% endfor %} {% endif %}
 </div>
 
 <div class="container">
-    <div class="container-title-block">
-        {% if page_obj %}
-            <p class="block-title">Results
-            {% if q_from %}
-                {%if q_to %}
-                from {{ q_from }} to {{ q_to }}
-                {% else %}
-                from {{ q_from }}
-                {% endif %}
-            {% else %}
-                {% if q_to %}
-                to {{ q_to }}
-                {% endif %}
-            {% endif %}
-            {% if q_category %}
-                ({{ category_out.title }})
-            {{ else }}
-                </p>
-            {% endif %}
-        {% else %}
-        <p class="block-title">No results</p>
-        {% endif %}
-        <div class="block-actions">
-            <a class="button-round button-yellow" href="{% url button_url b_u2 %}">{{ button_title }}</a>
-        </div>
+  <div class="container-title-block">
+    {% if page_obj %}
+    <p class="block-title">
+      Results {% if q_from %} {%if q_to %} from {{ q_from }} to {{ q_to }} {%
+      else %} from {{ q_from }} {% endif %} {% else %} {% if q_to %} to {{ q_to
+      }} {% endif %} {% endif %} {% if q_category %} ({{ category_out.title }})
+      {{ else }}
+    </p>
+    {% endif %} {% else %}
+    <p class="block-title">No results</p>
+    {% endif %}
+    <div class="block-actions">
+      <a class="button-round button-yellow" href="{% url button_url b_u2 %}"
+        >{{ button_title }}</a
+      >
     </div>
-    <hr>
-    <div class="container-content-block">
-        {% for action in page_obj %}
-        <div class="block-item mobile-column">
-            {% if action.user == request.user %}
-            <a class="item-title" href="{% url 'update-action' wallet.pk action.pk %}?next={{ request.path }}">
-                {{ action.user.username }} | {{ action.category.title }} | {{ action.title }}
-            </a>
-            {% else %}
-            <p class="item-title no-hover">
-                {{ action.user.username }} | {{ action.category.title }}{{ action.title }}</p>
-            {% endif %}
-            <div class="item-actions">
-                <p class="button-round button-{% if action.action_type == 'increase' %}green-c{% else %}red-c{% endif %}">{{ action.money }} {{ action.wallet.currency.title }} | {{ action.date }}</p>
-                {% if wallet.user == request.user %}
-                <a class="button-round button-red m-l" href="{% url 'delete-action' wallet_pk=wallet.pk pk=action.pk %}?next={{ request.path }}">Delete</a>
-                {% else %}
-                {% if action.user == request.user %}
-                <a class="button-round button-red m-l" href="{% url 'delete-action' wallet_pk=wallet.pk pk=action.pk %}?next={{ request.path }}">Delete</a>
-                {% endif %}
-                {% endif %}
-            </div>
-        </div>
-        {% endfor %}
-
-        {% if page_obj.has_other_pages %}
-        <span class="pagination">
-            {% if page_obj.has_previous %}
-            <a href="?page=1" class="button-round button-yellow">First</a>
-            <a href="?page={{ page_obj.previous_page_number }}" class="button-round button-yellow">&laquo;</a>
-            {% endif %}
-            <span class="page-padding">
-                {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-            </span>
-            {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}" class="button-round button-yellow">&raquo;</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}" class="button-round button-yellow">Last</a>
-            {% endif %}
-        </span>
-        {% endif %}
+  </div>
+  <hr />
+  <div class="container-content-block">
+    {% for action in page_obj %}
+    <div class="block-item mobile-column">
+      {% if action.user == request.user %}
+      <a
+        class="item-title"
+        style="border-left: 5px solid {{ action.category.color }};"
+        href="{% url 'update-action' wallet.pk action.pk %}?next={{ request.path }}"
+      >
+        {{ action.user.username }} | {{ action.title }}
+      </a>
+      {% else %}
+      <p class="item-title no-hover">
+        {{ action.user.username }} | {{ action.title }}
+      </p>
+      {% endif %}
+      <div class="item-actions">
+        <p
+          class="button-round button-{% if action.action_type == 'increase' %}green-c{% else %}red-c{% endif %}"
+        >
+          {{ action.money }} {{ action.wallet.currency.title }} | {{ action.date
+          }}
+        </p>
+        {% if wallet.user == request.user %}
+        <a
+          class="button-round button-red m-l"
+          href="{% url 'delete-action' wallet_pk=wallet.pk pk=action.pk %}?next={{ request.path }}"
+          >Delete</a
+        >
+        {% else %} {% if action.user == request.user %}
+        <a
+          class="button-round button-red m-l"
+          href="{% url 'delete-action' wallet_pk=wallet.pk pk=action.pk %}?next={{ request.path }}"
+          >Delete</a
+        >
+        {% endif %} {% endif %}
+      </div>
     </div>
+    {% endfor %} {% if page_obj.has_other_pages %}
+    <span class="pagination">
+      {% if page_obj.has_previous %}
+      <a href="?page=1" class="button-round button-yellow">First</a>
+      <a
+        href="?page={{ page_obj.previous_page_number }}"
+        class="button-round button-yellow"
+        >&laquo;</a
+      >
+      {% endif %}
+      <span class="page-padding">
+        {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      </span>
+      {% if page_obj.has_next %}
+      <a
+        href="?page={{ page_obj.next_page_number }}"
+        class="button-round button-yellow"
+        >&raquo;</a
+      >
+      <a
+        href="?page={{ page_obj.paginator.num_pages }}"
+        class="button-round button-yellow"
+        >Last</a
+      >
+      {% endif %}
+    </span>
+    {% endif %}
+  </div>
 </div>
 
-
 <div style="display: none">
-    {% if page_obj %}
-    <div class="title_name_block" >
-        <p class="block-title">Download actions</p>
-    </div>
-    <hr>
-    <div class="container">
-        <a class="button_round" href="{% url 'download' wallet.pk %}?from={{ request.GET.from }}&to={{ request.GET.to }}&category={{ request.GET.category }}">Download searched actions as JSON</a>
-    </div>
-    {% endif %}
+  {% if page_obj %}
+  <div class="title_name_block">
+    <p class="block-title">Download actions</p>
+  </div>
+  <hr />
+  <div class="container">
+    <a
+      class="button_round"
+      href="{% url 'download' wallet.pk %}?from={{ request.GET.from }}&to={{ request.GET.to }}&category={{ request.GET.category }}"
+      >Download searched actions as JSON</a
+    >
+  </div>
+  {% endif %}
 </div>
 
 {% if page_obj %}
 <div class="container">
-    <div class="container-title-block">
-        <p class="block-title">Graphics</p>
-    </div>
-    <hr>
-    <div class="canvas-container">
-        <canvas id="ChartInc"></canvas>
-        <canvas id="ChartSpn"></canvas>
-    </div>
-    <hr>
+  <div class="container-title-block">
+    <p class="block-title">Graphics</p>
+  </div>
+  <hr />
+  <div class="canvas-container">
+    <canvas id="ChartInc"></canvas>
+    <canvas id="ChartSpn"></canvas>
+  </div>
+  <hr />
 
-    <div class="container-content-block">
-        {% for item in t_g %}
-        <div class="block-item mobile-column">
-            <a class="item-title" href="{% url 'search-results' wallet.pk %}?category={{item.category_id}}&from=&to=">
-                {{ item.title }} {{ item.category_id }}
-            </a>
-            <div class="item-actions">
-                <span class="button-round button-blue-c">Total: {{ item.total }} {{ wallet.currency.title }}</span>
-                <span class="button-round button-green-c m-l">INC: {{ item.increase }} {{ wallet.currency.title }}</span>
-                <span class="button-round button-red-c m-l">SPD: {{ item.spending }} {{ wallet.currency.title }}</span>
-            </div>
-        </div>
-        {% endfor %}
+  <div class="container-content-block">
+    {% for item in t_g %}
+    <div class="block-item mobile-column">
+      <a
+        class="item-title"
+        style="border-left: 5px solid {{ item.category_color }};"
+        href="{% url 'search-results' wallet.pk %}?category={{item.category_id}}&from=&to="
+      >
+        {{ item.title }} {{ item.category_id }}
+      </a>
+      <div class="item-actions">
+        <span class="button-round button-blue-c"
+          >Total: {{ item.total }} {{ wallet.currency.title }}</span
+        >
+        <span class="button-round button-green-c m-l"
+          >INC: {{ item.increase }} {{ wallet.currency.title }}</span
+        >
+        <span class="button-round button-red-c m-l"
+          >SPD: {{ item.spending }} {{ wallet.currency.title }}</span
+        >
+      </div>
     </div>
-
+    {% endfor %}
+  </div>
 </div>
-{% endif %}
-
-
-{% block scripts %}
+{% endif %} {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    
-    const data = {
-    labels: [{% for item in t_g %}'{{ item.title }}',{% endfor %}],
-    datasets: [{
-        label: 'Increase',
-        data: [{% for item in t_g %}{{ item.increase }},{% endfor %}],
-        borderColor: ['rgb(26, 85, 29)'],
-        backgroundColor: ['rgb(26, 85, 29, 0.75)']
-    }],
-};
-    const data1 = {
-    labels: [{% for item in t_g %}'{{ item.title }}',{% endfor %}],
-    datasets: [
-    {
-        label: 'Spending',
-        data: [{% for item in t_g %}{{ item.spending }},{% endfor %}],
-        borderColor: ['rgb(85, 26, 26)'],
-        backgroundColor: ['rgb(85, 26, 26, 0.75)']
-    }
-    ]};
-  
-    const config = {
-        type: 'bar',
-        data: data,
-        options: {
-            indexAxis: 'y',
-            responsive: false,
-            plugins: {
-                legend: {
-                    labels: {
-                        font: {
-                            size: 16,
-                            weight: 'bold',
-                        },
+      const data = {
+      labels: [{% for item in t_g %}'{{ item.title }}',{% endfor %}],
+      datasets: [{
+          label: 'Increase',
+          data: [{% for item in t_g %}{{ item.increase }},{% endfor %}],
+          borderColor: ['rgb(26, 85, 29)'],
+          backgroundColor: [
+          {% for item in t_g %}'{{ item.category_color }}aa',{% endfor %}
+          ]
+      }],
+  };
+      const data1 = {
+      labels: [{% for item in t_g %}'{{ item.title }}',{% endfor %}],
+      datasets: [
+      {
+          label: 'Spending',
+          data: [{% for item in t_g %}{{ item.spending }},{% endfor %}],
+          borderColor: ['rgb(85, 26, 26)'],
+          backgroundColor: [
+              {% for item in t_g %}'{{ item.category_color }}aa',{% endfor %}
+          ]
+      }
+      ]};
 
-                    }
-                }
-            }
-        },
-    };
-    const config1 = {
-        type: 'bar',
-        data: data1,
-        options: {
-            indexAxis: 'y',
-            responsive: false,
-            plugins: {
-                legend: {
-                    labels: {
-                        font: {
-                            size: 16,
-                            weight: 'bold',
-                        },
+      const config = {
+          type: 'bar',
+          data: data,
+          options: {
+              indexAxis: 'y',
+              responsive: false,
+              plugins: {
+                  legend: {
+                      labels: {
+                          font: {
+                              size: 16,
+                              weight: 'bold',
+                          },
+                      }
+                  }
+              }
+          },
+      };
+      const config1 = {
+          type: 'bar',
+          data: data1,
+          options: {
+              indexAxis: 'y',
+              responsive: false,
+              plugins: {
+                  legend: {
+                      labels: {
+                          font: {
+                              size: 16,
+                              weight: 'bold',
+                          },
+                      }
+                  }
+              }
+          },
+      };
 
-                    }
-                }
-            }
-        },
-    };
-    Chart.defaults.font.family = 'Source Sans Pro';
-    const ChartInc = new Chart(
-        document.getElementById('ChartInc'),
-        config
-        );
-    const ChartSpn = new Chart(
-            document.getElementById('ChartSpn'),
-            config1
-            );
-  </script>
-{% endblock %}
-{% endblock %}
+      Chart.defaults.font.family = 'Source Sans Pro';
+
+      function device_width_chart(x) {
+          if (x.matches) { // If media query matches
+              Chart.defaults.font.size = 32;
+          } else {
+              Chart.defaults.font.size = 16;
+          }
+        }
+        var x = window.matchMedia("(max-device-width: 767px)")
+        device_width_chart(x)
+        x.addListener(device_width_chart)
+
+      const ChartInc = new Chart(
+          document.getElementById('ChartInc'),
+          config
+          );
+
+      const ChartSpn = new Chart(
+              document.getElementById('ChartSpn'),
+              config1
+              );
+</script>
+{% endblock %} {% endblock %}

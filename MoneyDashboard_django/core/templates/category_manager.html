@@ -1,57 +1,73 @@
-{% extends 'home.html' %}
-{% block content %}
+{% extends 'home.html' %} {% block content %}
 <div class="container message-container">
-    {% if messages %}
-    {% for message in messages %}
-    <span class="message message_{{ message.tags }} no-wrap">{{ message }}</span>
-    {% endfor %}
-    {% endif %}
+  {% if messages %} {% for message in messages %}
+  <span class="message message_{{ message.tags }} no-wrap">
+    {{ message }}
+  </span>
+  {% endfor %} {% endif %}
 </div>
 
 <div class="container">
-    <div class="container-title-block">
-        <p class="block-title">Category Manager</p>
-        <div class="block-actions">
-            <a class="button-round button-green" href="{% url 'create-category' wallet.pk %}?next={{ request.path }}">Create&nbspCategory</a>
-            <a class="button-round button-yellow" href="{% url 'wallet-page' wallet_pk=wallet.pk %}">Back</a>
-        </div>
+  <div class="container-title-block">
+    <p class="block-title">Category Manager</p>
+    <div class="block-actions">
+      <a
+        class="button-round button-green"
+        href="{% url 'create-category' wallet.pk %}?next={{ request.path }}"
+      >
+        Create&nbspCategory
+      </a>
+      <a
+        class="button-round button-yellow m-l"
+        href="{% url 'wallet-page' wallet_pk=wallet.pk %}"
+        >Back</a
+      >
     </div>
-    <hr>
-    <div class="container-content-block">
-        {% for category in page_obj %}
-        <div class="block-item mobile-column">
-            {% if wallet.user == request.user %}
-                <a class="item-title" href="{% url 'update-category' wallet.pk category.pk %}?next={{ request.get_full_path|urlencode }}">
-                    <span class="only-title">{{ category.user }}</span>
-                    <span class="item-name-title">
-                        {{ category.title }}
-                    </span>
-                </a>
-                <div class="item-actions">
-                    <a class="button-round button-red" href="{% url 'delete-category' wallet_pk=wallet.pk pk=category.pk %}?next={{ request.get_full_path|urlencode }}">Delete</a>
-                </div>
-            {% else %}
-                {% if category.user == request.user %}
-                <a class="item-title" href="{% url 'update-category' wallet.pk category.pk %}?next={{ request.get_full_path|urlencode }}">
-                    <span class="only-title">{{ category.user }}</span>
-                    <span class="item-name-title">
-                        {{ category.title }}
-                    </span>
-                </a>
-                <div class="item-actions">
-                    <a class="button-round button-red" href="{% url 'delete-category' wallet_pk=wallet.pk pk=category.pk %}?next={{ request.get_full_path|urlencode }}">Delete</a>
-                </div>
-                {% else %}
-                <p class="item-title">
-                    <span class="only-title">{{ category.user }}</span>
-                    <span class="item-name-title">
-                        {{ category.title }}
-                    </span></p>
-                {% endif %}
-            {% endif %}
-        </div>
-        {% endfor %}
+  </div>
+  <hr />
+  <div class="container-content-block">
+    {% for category in page_obj %}
+    <div class="block-item mobile-column">
+      {% if wallet.user == request.user %}
+      <a
+        class="item-title"
+        style="border-left: 5px solid {{ category.color }};"
+        href="{% url 'update-category' wallet.pk category.pk %}?next={{ request.get_full_path|urlencode }}"
+      >
+        <span class="only-title">{{ category.user }}</span>
+        <span class="item-name-title"> {{ category.title }} </span>
+      </a>
+      <div class="item-actions">
+        <a
+          class="button-round button-red"
+          href="{% url 'delete-category' wallet_pk=wallet.pk pk=category.pk %}?next={{ request.get_full_path|urlencode }}"
+          >Delete</a
+        >
+      </div>
+      {% else %} {% if category.user == request.user %}
+      <a
+        class="item-title"
+        href="{% url 'update-category' wallet.pk category.pk %}?next={{ request.get_full_path|urlencode }}"
+      >
+        <span class="only-title">{{ category.user }}</span>
+        <span class="item-name-title"> {{ category.title }} </span>
+      </a>
+      <div class="item-actions">
+        <a
+          class="button-round button-red"
+          href="{% url 'delete-category' wallet_pk=wallet.pk pk=category.pk %}?next={{ request.get_full_path|urlencode }}"
+          >Delete</a
+        >
+      </div>
+      {% else %}
+      <p class="item-title">
+        <span class="only-title">{{ category.user }}</span>
+        <span class="item-name-title"> {{ category.title }} </span>
+      </p>
+      {% endif %} {% endif %}
     </div>
+    {% endfor %}
+  </div>
 </div>
 
 {% endblock content %}

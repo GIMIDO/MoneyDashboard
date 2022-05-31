@@ -1,41 +1,51 @@
-{% extends 'home.html' %}
-{% block content %}
+{% extends 'home.html' %} {% block content %}
 
 <div class="container message-container">
-    {% if messages %}
-    {% for message in messages %}
-    <span class="message message_{{ message.tags }} no-wrap">{{ message }}</span>
-    {% endfor %}
-    {% endif %}
+  {% if messages %} {% for message in messages %}
+  <span class="message message_{{ message.tags }} no-wrap">{{ message }}</span>
+  {% endfor %} {% endif %}
 </div>
 
 <div class="container">
-    <div class="container-title-block">
-        <p class="block-title">Users with access</p>
-        <div class="block-actions">
-            <a class="button-round button-green" href="{% url 'add-access' wallet_pk=wallet_pk %}?next={{ request.path }}">Add</a>
-            <a class="button-round button-yellow" href="{% url 'wallet-page' wallet_pk %}">Back</a>
-        </div>
+  <div class="container-title-block">
+    <p class="block-title">Users with access</p>
+    <div class="block-actions">
+      <a
+        class="button-round button-green"
+        href="{% url 'add-access' wallet_pk=wallet_pk %}?next={{ request.path }}"
+        >Add</a
+      >
+      <a
+        class="button-round button-yellow m-l"
+        href="{% url 'wallet-page' wallet_pk %}"
+        >Back</a
+      >
     </div>
-    <hr>
-    <div class="container-content-block">
-        {% if t_wallet %}
-        {% for t_walle in t_wallet %}
-        <div class="block-item mobile-column">
-            <a class="item-title" href="{% url 'profile' t_walle.user.username %}?next={{ request.path }}">
-                <span class="item-name-title p-l-8">{{ t_walle.user.username }}</span>
-            </a>
-            <div class="item-actions">
-                <a class="button-round button-red" href="{% url 'delete-access' wallet_pk=t_walle.wallet.pk user=t_walle.user.username %}?next={{ request.path }}">Delete</a>
-            </div>
-        </div>
-        {% endfor %}
-{% else %}
-<div class="title_name_block">
-    <p class="item-name-title">No users!</p>
-</div>
-{% endif %}
+  </div>
+  <hr />
+  <div class="container-content-block">
+    {% if t_wallet %} {% for t_walle in t_wallet %}
+    <div class="block-item mobile-column">
+      <a
+        class="item-title"
+        href="{% url 'profile' t_walle.user.username %}?next={{ request.path }}"
+      >
+        <span class="item-name-title p-l-8">{{ t_walle.user.username }}</span>
+      </a>
+      <div class="item-actions">
+        <a
+          class="button-round button-red"
+          href="{% url 'delete-access' wallet_pk=t_walle.wallet.pk user=t_walle.user.username %}?next={{ request.path }}"
+          >Delete</a
+        >
+      </div>
     </div>
+    {% endfor %} {% else %}
+    <div class="title_name_block">
+      <p class="item-name-title">No users!</p>
+    </div>
+    {% endif %}
+  </div>
 </div>
 
 {% endblock content %}

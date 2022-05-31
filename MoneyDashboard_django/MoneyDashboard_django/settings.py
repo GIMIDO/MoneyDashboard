@@ -11,6 +11,7 @@ ALLOWED_HOSTS = ["192.168.0.105", "127.0.0.1"]
 
 INSTALLED_APPS = [
     'core',
+    'colorfield',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

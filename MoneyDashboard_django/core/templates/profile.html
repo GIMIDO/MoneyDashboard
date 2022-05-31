@@ -1,42 +1,40 @@
-{% extends 'home.html' %}
-{% block content %}
-
-{% if messages %}
+{% extends 'home.html' %} {% block content %} {% if messages %}
 <div class="container message-container">
-    {% for message in messages %}
-    <span class="message message_{{ message.tags }} no-wrap">{{ message }}</span>
-    {% endfor %}
+  {% for message in messages %}
+  <span class="message message_{{ message.tags }} no-wrap">{{ message }}</span>
+  {% endfor %}
 </div>
 {% endif %}
 
 <div class="container">
-    <div class="container-title-block">
-        <p class="block-title">{{ profile.user.username }} profile</p>
-        <div class="block-actions">
-            {% if profile.user.username == request.user.username %}
-            <a class="button-round button-blue" href="{% url 'profile-update' profile.user.username %}?next={{ request.get_full_path|urlencode }}">Update profile</a>
-            {% endif %}
-            <a class="button-round button-yellow m-l" href="{{ go_next }}">{{ button_title }}</a>
-        </div>
+  <div class="container-title-block">
+    <p class="block-title username-page">{{ profile.user.username }} profile</p>
+    <div class="block-actions">
+      {% if profile.user.username == request.user.username %}
+      <a
+        class="button-round button-blue"
+        href="{% url 'profile-update' profile.user.username %}?next={{ request.get_full_path|urlencode }}"
+        >Update profile</a
+      >
+      {% endif %}
+      <a class="button-round button-yellow m-l" href="{{ go_next }}"
+        >{{ button_title }}</a
+      >
     </div>
-    <hr>
-    <div class="container-content-title profile">
-        <div class="image_square">
-            {% if profile.avatar %}
-            {% load static %}
-            <img src="{{ profile.avatar.url }}" alt="..."/>
-            {% endif %}
-        </div>
-        <div class="info">
-            <p>
-                {{ profile.first_name }} {{ profile.last_name }}
-            </p>
-            <p>
-                {{ profile.bio }}
-            </p>
-        </div>
+  </div>
+  <hr />
+  <div class="container-content-title profile">
+    <div class="image_square">
+      {% if profile.avatar %} {% load static %}
+      <img src="{{ profile.avatar.url }}" alt="avatar" />
+      {% endif %}
     </div>
+    <div class="info">
+      <p>{{ profile.first_name }} {{ profile.last_name }}</p>
+      <p>{{ profile.email }}</p>
+      <p>{{ profile.bio }}</p>
+    </div>
+  </div>
 </div>
-
 
 {% endblock content %}
