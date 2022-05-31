@@ -279,3 +279,21 @@ class ObjectiveTransferForm(forms.Form):
                                             user=user,
                                             currency=currency)
         self.fields['wallets'].label = 'From wallet'
+
+
+class WalletMessageForm(forms.ModelForm):
+
+    message = forms.CharField(
+        required=True,
+        widget=forms.TextInput(
+            attrs={
+                'type':'text'}))
+
+    class Meta:
+        model = WalletMessage
+        fields = [
+            'message'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)

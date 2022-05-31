@@ -1,3 +1,4 @@
+from urllib import request
 from .models import *
 from django.db.models import Q
 
@@ -103,19 +104,23 @@ def get_next_link(request):
         return '/'
 
 
-def transfer_money(wallet_from, wallet_to, money):
+def transfer_money(wallet_from, wallet_to, money, user):
 
     wallet_from.start_amount -= money
     wallet_from.save()
     wallet_to.start_amount += money
     wallet_to.save()
+    
+    log_write('0', "create", "transfer", str('from ' + wallet_from.title + ' to ' + wallet_to.title + ' ' + str(money)), user)
 
-def objective_transfer_money(objective, wallet, money):
+def objective_transfer_money(objective, wallet, money, user):
 
     wallet.start_amount -= money
     wallet.save()
     objective.now_amount += money
     objective.save()
+    
+    log_write('0', "create", "transfer", str('from ' + wallet.title + ' to ' + objective.title + ' ' + str(money)), user)
 
 
 def total_graph(actions, categories):
@@ -150,3 +155,21 @@ def total_graph(actions, categories):
 
     return total_amount_graph
     
+
+def log_write(wallet_pk, a_type, model, text, user):
+
+    if wallet_pk == '0':
+        log_message = LogTable.objects.create(
+            user = user,
+            a_type = a_type,
+            message = '{}d {} "{}"'.format(a_type, model, text)
+        )
+        log_message.save()
+
+    else:
+        log_message = LogTable.objects.create(
+            user = Wallet.objects.get(pk=wallet_pk).user,
+            a_type = a_type,
+            message = '{}d {} "{}"'.format(a_type, model, text)
+        )
+        log_message.save()

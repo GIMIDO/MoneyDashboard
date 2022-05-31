@@ -1,3 +1,4 @@
+from xml.dom import UserDataHandler
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import View
 from django.http import HttpResponseRedirect, HttpResponse
@@ -278,6 +279,7 @@ class CreateAction(AuthUserMixin, View):
                 "Added action: {}"
                 .format(form.cleaned_data['title'])
             )
+            log_write(wallet_pk, "create", "action", form.cleaned_data['title'], request.user)
 
             return HttpResponseRedirect(get_next_link(request))
 
@@ -340,6 +342,7 @@ class UpdateAction(AuthUserMixin, View):
                 "Updated action: {}"
                 .format(form.cleaned_data['title'])
             )
+            log_write(wallet_pk, "update", "action", form.cleaned_data['title'], request.user)
 
             return HttpResponseRedirect(get_next_link(request))
 
@@ -388,19 +391,22 @@ class CreateCategory(AuthUserMixin, View):
 
     def post(self, request, **kwargs):
 
-        wallet = Wallet.objects.get(pk=kwargs.get('wallet_pk'))
+        wallet_pk = kwargs.get('wallet_pk')
+        wallet = Wallet.objects.get(pk=wallet_pk)
         form = CategoryForm(request.POST or None)
         
         if form.is_valid():
             Category.objects.create(
                 title=form.cleaned_data['title'], 
                 wallet=wallet,
-                user=request.user
+                user=request.user,
+                color=form.cleaned_data['color']
             )
             messages.add_message(request, messages.SUCCESS,
                 "Added category: {}!"
                 .format(form.cleaned_data['title'])
             )
+            log_write(wallet_pk, "create", "category", form.cleaned_data['title'], request.user)
 
             return HttpResponseRedirect(get_next_link(request))
 
@@ -445,6 +451,8 @@ class UpdateCategory(AuthUserMixin, View):
             return HttpResponseRedirect(get_next_link(request))
 
     def post(self, request, **kwargs):
+
+        wallet_pk = kwargs.get('wallet_pk')
         category = Category.objects.get(pk=kwargs.get('pk'))
         form = CategoryForm(request.POST or None, instance=category)
 
@@ -454,7 +462,8 @@ class UpdateCategory(AuthUserMixin, View):
                 "Updated category: {}"
                 .format(form.cleaned_data['title'])
             )
-
+            log_write(wallet_pk, "update", "category", form.cleaned_data['title'], request.user)
+            
             return HttpResponseRedirect(get_next_link(request))
 
         else:
@@ -531,6 +540,7 @@ class CreateWallet(AuthUserMixin, View):
                 "Added wallet: {}!"
                 .format(form.cleaned_data['title'])
             )
+            log_write('0', "create", "wallet", form.cleaned_data['title'], request.user)
 
             return HttpResponseRedirect(get_next_link(request))
 
@@ -574,9 +584,10 @@ class UpdateWallet(AuthUserMixin, View):
 
     def post(self, request, **kwargs):
 
+        wallet_pk = kwargs.get('wallet_pk')
         wallet = Wallet.objects.get(
             user=request.user,
-            pk=(kwargs.get('wallet_pk'))
+            pk=wallet_pk
         )
         form = WalletForm(request.user, request.POST or None,
             instance=wallet
@@ -587,6 +598,7 @@ class UpdateWallet(AuthUserMixin, View):
                 "Updated wallet: {}"
                 .format(form.cleaned_data['title'])
             )
+            log_write(wallet_pk, "update", "wallet", form.cleaned_data['title'], request.user)
 
             return HttpResponseRedirect(get_next_link(request))
 
@@ -619,6 +631,7 @@ class WalletView(AuthUserMixin, View):
             paginator = Paginator(actions, 10)
             page_number = request.GET.get('page')
             page_obj = paginator.get_page(page_number)
+            w_messages = WalletMessage.objects.filter(wallet=wallet_pk)
 
             context = {
                 'wallet': wallet,
@@ -626,7 +639,8 @@ class WalletView(AuthUserMixin, View):
                 'page_obj': page_obj,
                 'count': actions.count,
                 'categories': categories,
-                't_g': total_graph(actions, categories)
+                't_g': total_graph(actions, categories),
+                'w_messages': w_messages
             }
 
             return render(request, 'wallet.html', context)
@@ -668,6 +682,7 @@ class CreateCurrency(AuthUserMixin, View):
                 "Added currency: {}!"
                 .format(form.cleaned_data['title'])
             )
+            log_write('0', "create", "currency", form.cleaned_data['title'], request.user)
 
             return HttpResponseRedirect(get_next_link(request))
 
@@ -720,6 +735,7 @@ class UpdateCurrency(AuthUserMixin, View):
                 "Updated currency: {}"
                 .format(form.cleaned_data['title'])
             )
+            log_write('0', "update", "currency", form.cleaned_data['title'], request.user)
 
             return HttpResponseRedirect(get_next_link(request))
 
@@ -748,14 +764,16 @@ class DeleteModelView(AuthUserMixin, View):
 
     def get(self, request, **kwargs):
 
-        self.CHOISE[kwargs['model']].objects.get(
+        item = self.CHOISE[kwargs['model']].objects.get(
             pk=(kwargs.get('pk')),
             user=request.user
-        ).delete()
+        )
+        item.delete()
         messages.add_message(request, messages.WARNING,
             "Deleted {}"
             .format(kwargs.get('model'))
         )
+        log_write('0', "delete", kwargs.get('model'), item.title, request.user)
 
         return HttpResponseRedirect(get_next_link(request))
 
@@ -765,9 +783,10 @@ class DeleteActionView(AuthUserMixin, View):
     def get(self, request, **kwargs):
 
         action_pk = kwargs.get('pk')
+        wallet_pk = kwargs.get('wallet_pk')
 
         if (Action.objects.get(pk=action_pk).user == request.user) \
-        or (Wallet.objects.get(pk=kwargs.get('wallet_pk')).user == request.user):
+        or (Wallet.objects.get(pk=wallet_pk).user == request.user):
             action = Action.objects.get(pk=action_pk)
             calc_amount_wallet('delete', action, action.wallet.pk)
             messages.add_message(request, messages.SUCCESS,
@@ -775,6 +794,7 @@ class DeleteActionView(AuthUserMixin, View):
                 .format(action.title)
             )
             action.delete()
+            log_write(wallet_pk, "delete", "action", action.title, request.user)
 
             return HttpResponseRedirect(get_next_link(request))
 
@@ -791,9 +811,10 @@ class DeleteCategoryView(AuthUserMixin, View):
     def get(self, request, **kwargs):
 
         ctg_pk = kwargs.get('pk')
+        wallet_pk = kwargs.get('wallet_pk')
 
         if (Category.objects.get(pk=ctg_pk).user == request.user) \
-        or (Wallet.objects.get(pk=kwargs.get('wallet_pk')).user == request.user):
+        or (Wallet.objects.get(pk=wallet_pk).user == request.user):
             category = Category.objects.get(pk=ctg_pk)
             actions = Action.objects.filter(category=ctg_pk)
 
@@ -804,7 +825,35 @@ class DeleteCategoryView(AuthUserMixin, View):
                 "Deleted category {}"
                 .format(category.title)
             )
+            log_write(wallet_pk, "delete", "category", category.title, request.user)
             category.delete()
+
+            return HttpResponseRedirect(get_next_link(request))
+
+        else:
+            messages.add_message(request, messages.WARNING,
+                "Error!"
+            )
+
+            return HttpResponseRedirect(get_next_link(request))
+
+
+class DeleteWalletMessageView(AuthUserMixin, View):
+
+    def get(self, request, **kwargs):
+
+        msg_pk = kwargs.get('pk')
+        wallet_pk = kwargs.get('wallet_pk')
+        wallet = Wallet.objects.get(pk=wallet_pk)
+
+        if FamilyAccess.objects.filter(user=request.user, wallet=wallet) \
+        or wallet.user == request.user:
+            w_message = WalletMessage.objects.get(pk=msg_pk)
+            messages.add_message(request, messages.SUCCESS,
+                "Deleted message!"
+            )
+            log_write(wallet_pk, "delete", "note", w_message.message, request.user)
+            w_message.delete()
 
             return HttpResponseRedirect(get_next_link(request))
 
@@ -839,10 +888,11 @@ class DeleteAccessView(AuthUserMixin, OwnerAccessMixin, View):
 
     def get(self, request, **kwargs):
 
+        wallet_pk = kwargs.get('wallet_pk')
         instance = FamilyAccess.objects.get(
             wallet=Wallet.objects.get(
                 user=request.user,
-                pk=kwargs.get('wallet_pk')
+                pk=wallet_pk
             ),
             user=User.objects.get(
                 username=kwargs.get('user')
@@ -852,6 +902,7 @@ class DeleteAccessView(AuthUserMixin, OwnerAccessMixin, View):
             "Deleted user: {}!"
             .format(instance.user.username)
         )
+        log_write(wallet_pk, "delete", "access for", instance.user.username, request.user)
         instance.delete()
 
         return redirect(get_next_link(request))
@@ -874,6 +925,7 @@ class AddAccessView(AuthUserMixin, OwnerAccessMixin, View):
 
     def post(self, request, **kwargs):
 
+        wallet_pk = kwargs.get('wallet_pk')
         form = FamilyAccessForm(request.POST or None)
 
         if form.is_valid():
@@ -882,12 +934,13 @@ class AddAccessView(AuthUserMixin, OwnerAccessMixin, View):
                 user=user,
                 wallet=Wallet.objects.get(
                     user=request.user,
-                    pk=kwargs.get('wallet_pk')
+                    pk=wallet_pk
                 )
             )
             messages.add_message(request, messages.SUCCESS,
                 "Added user: {}".format(form.cleaned_data['user1'])
             )
+            log_write(wallet_pk, "create", "access for", user.username, request.user)
 
             return HttpResponseRedirect(get_next_link(request))
 
@@ -912,7 +965,7 @@ class ProfileView(AuthUserMixin, View):
         context = {
             'go_next': get_next_link(request),
             'profile': profile,
-            'button_title':'Back'
+            'button_title':'Home'
         }
 
         return render(request, 'profile.html', context)
@@ -1010,6 +1063,7 @@ class ObjectiveCreate(AuthUserMixin, View):
                 "Added objective: {}!"
                 .format(form.cleaned_data['title'])
             )
+            log_write('0', "create", "objective", form.cleaned_data['title'], request.user)
 
             return HttpResponseRedirect(get_next_link(request))
 
@@ -1069,6 +1123,7 @@ class ObjectiveUpdate(AuthUserMixin, View):
                 "Updated objective: {}"
                 .format(form.cleaned_data['title'])
             )
+            log_write('0', "update", "objective", form.cleaned_data['title'], request.user)
 
             return HttpResponseRedirect(get_next_link(request))
 
@@ -1128,12 +1183,12 @@ class ObjectiveTransfer(AuthUserMixin, View):
 
         if form.is_valid():
             wallet = form.cleaned_data['wallets']
-            money = form.cleaned_data['money']
+            money = float(form.cleaned_data['money'])
 
             if wallet.start_amount >= money:
 
                 if (objective.target_amount - objective.now_amount) >= money:
-                    objective_transfer_money(objective, wallet, money)
+                    objective_transfer_money(objective, wallet, money, request.user)
                     messages.add_message(request, messages.SUCCESS,
                         "{} {} transfered to {}"
                         .format(
@@ -1174,10 +1229,15 @@ class MoneyTransfer(AuthUserMixin, View):
 
     def get(self, request, **kwargs):
 
-        if (Wallet.objects.get(pk=kwargs.get('wallet_pk')).user == request.user):
+        wallet_pk = kwargs.get('wallet_pk')
+        wallet = Wallet.objects.get(pk=wallet_pk)
+        if (wallet.user == request.user):
             form = MoneyTransferForm(
-                kwargs.get('wallet_pk'),
+                wallet_pk,
                 request.user, request.POST or None
+            )
+            messages.add_message(request, messages.SUCCESS,
+                "Wallet money: {}".format(wallet.start_amount)
             )
 
             context = {
@@ -1206,12 +1266,13 @@ class MoneyTransfer(AuthUserMixin, View):
         wallet_from = Wallet.objects.get(pk=wallet_pk)
 
         if form.is_valid():
-
-            if wallet_from.start_amount >= form.cleaned_data['money']:
+            money = float(form.cleaned_data['money'])
+            if wallet_from.start_amount >= money:
                 transfer_money(
                     wallet_from,
                     form.cleaned_data['wallets'],
-                    form.cleaned_data['money']
+                    money,
+                    request.user
                 )
                 messages.add_message(request, messages.SUCCESS,
                     "Money transfered to {}"
@@ -1233,3 +1294,92 @@ class MoneyTransfer(AuthUserMixin, View):
         }
 
         return render(request, 'page_manager.html', context)
+
+
+class AddWalletMessage(AuthUserMixin, View):
+
+    def get(self, request, **kwargs):
+
+        wallet_pk = kwargs.get('wallet_pk')
+        wallet = Wallet.objects.get(pk=wallet_pk)
+
+        if FamilyAccess.objects.filter(user=request.user, wallet=wallet) \
+        or wallet.user == request.user:
+
+            form = WalletMessageForm(request.POST or None)
+            messages.add_message(request, messages.SUCCESS,
+                "Max message length: {} symbols"
+                .format('150')
+            )
+            context = {
+                'form': form,
+                'go_next': get_next_link(request),
+                'page_title':'Create message',
+                'button_title':'Back'
+            }
+
+            return render(request, 'page_manager.html', context)
+
+    def post(self, request, **kwargs):
+
+        wallet_pk = kwargs.get('wallet_pk')
+
+        form = WalletMessageForm(request.POST or None)
+
+        if form.is_valid():
+            WalletMessage.objects.create(
+                wallet=Wallet.objects.get(pk=wallet_pk),
+                message=form.cleaned_data['message']
+            )
+            messages.add_message(request, messages.SUCCESS,
+                "Added new message!"
+            )
+            log_write(wallet_pk, "create", "note", form.cleaned_data['message'], request.user)
+
+            return HttpResponseRedirect(get_next_link(request))
+
+        context = {
+            'form': form,
+            'go_next': get_next_link(request),
+            'page_title':'Create message',
+            'button_title':'Back'
+        }
+
+        return render(request, 'page_manager.html', context)
+
+
+class ShowLogView(AuthUserMixin, View):
+
+    def get(self, request, **kwargs):
+
+        username = kwargs.get('username')
+
+        logs = LogTable.objects.filter(user=User.objects.get(username=username)).order_by('-created_at')
+
+        context = {
+            'go_next': get_next_link(request),
+            'logs': logs,
+            'button_title':'Back'
+        }
+
+        return render(request, 'logs_page.html', context)
+
+
+class SearchUser(AuthUserMixin, View):
+
+    def get(self, request, **kwargs):
+        
+        q_username = self.request.GET.get("q_username")
+
+        try:
+            User.objects.get(username=q_username)
+
+        except:
+            messages.add_message(request, messages.WARNING,
+                'User "{}" not found'
+                .format(q_username)
+            )
+
+            return redirect('profile', username=request.user.username)
+
+        return redirect('profile', username=q_username)

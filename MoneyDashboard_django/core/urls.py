@@ -23,6 +23,9 @@ urlpatterns = [
         # search page
     path('wallet/<int:wallet_pk>/search/',
          SearchResultsView.as_view(), name='search-results'),
+        # search user
+    path('profile/search/',
+         SearchUser.as_view(), name='search-user'),
 
     # action
     path('wallet/<int:wallet_pk>/action/create/',
@@ -87,5 +90,15 @@ urlpatterns = [
          ObjectiveUpdate.as_view(), name='objective-update'),
     path('objective/<int:pk>/transfer/',
          ObjectiveTransfer.as_view(), name='objective-transfer'),
+
+    # wallet message
+    path('wallet/<int:wallet_pk>/add-message/',
+         AddWalletMessage.as_view(), name='add-message'),
+    path('wallet/<int:wallet_pk>/delete-message/<int:pk>',
+         DeleteWalletMessageView.as_view(), name='delete-message'),
+
+    # logs
+    path('profile/<str:username>/logs',
+         ShowLogView.as_view(), name='logs')
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

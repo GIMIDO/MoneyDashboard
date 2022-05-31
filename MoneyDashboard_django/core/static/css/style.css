@@ -90,7 +90,7 @@ textarea:focus {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  width: calc(100% - 210px);
+  width: calc(100% - 280px);
 }
 
 /*  MAIN  */
@@ -424,6 +424,10 @@ span.helptext {
   margin-left: auto;
 }
 
+input.user-search {
+  max-width: 600px;
+  width: 100%;
+}
 /* Portrait */
 @media screen and (max-device-width: 767px) and (orientation: portrait) {
   hr {
@@ -516,6 +520,7 @@ span.helptext {
 
   .mobile-column > .block-actions {
     margin-left: 0;
+    justify-content: center;
   }
 
   .block-item {

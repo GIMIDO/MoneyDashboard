@@ -14,7 +14,12 @@
       <a
         class="button-round button-blue"
         href="{% url 'profile-update' profile.user.username %}?next={{ request.get_full_path|urlencode }}"
-        >Update profile</a
+        >Edit</a
+      >
+      <a
+        class="button-round button-blue m-l"
+        href="{% url 'logs' profile.user.username %}?next={{ request.get_full_path|urlencode }}"
+        >Logs</a
       >
       {% endif %}
       <a class="button-round button-yellow m-l" href="{{ go_next }}"
@@ -37,4 +42,22 @@
   </div>
 </div>
 
+{% if profile.user.username == request.user.username %}
+<form
+  class="container"
+  action="{% url 'search-user' %}?next={{ request.path }}"
+  method="get"
+>
+  <div class="container-title-block">
+    <p class="block-title">Find user</p>
+    <div class="block-actions">
+      <div class="search-block-item">
+        <p class="search-p">username</p>
+        <input class="user-search" name="q_username" type="text" placeholder="Enter username..." />
+      </div>
+      <input class="button-round button-green m-l" type="submit" value="Search" />
+    </div>
+  </div>
+</form>
+{% endif %}
 {% endblock content %}

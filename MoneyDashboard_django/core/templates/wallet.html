@@ -12,6 +12,30 @@
   {% endfor %} {% endif %}
 </div>
 
+{% if w_messages %}
+<div class="container">
+  <div class="container-title-block">
+    <p class="block-title">Notes</p>
+  </div>
+  <hr />
+  <div class="container-content-block">
+    {% for message in w_messages %}
+    <div class="block-item mobile-column">
+      <a class="item-title"> {{ message.message }} </a>
+      
+      <div class="item-actions">
+      <a
+        class="button-round button-red m-l"
+        href="{% url 'delete-message' wallet_pk=wallet.pk pk=message.pk %}?next={{ request.path }}"
+        >Delete</a
+      >
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
 <div class="container">
   <div class="container-title-block mobile-column">
     {% if page_obj %}
@@ -22,8 +46,13 @@
     <div class="block-actions">
       <a
         class="button-round button-green"
+        href="{% url 'add-message' wallet.pk %}?next={{ request.path }}"
+        >Note</a
+      >
+      <a
+        class="button-round button-green m-l"
         href="{% url 'create-action' wallet.pk %}?next={{ request.path }}"
-        >New&nbspAction</a
+        >Action</a
       >
       <a
         class="button-round button-blue m-l"
@@ -209,88 +238,88 @@
 {% endif %} {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-      const data = {
-      labels: [{% for item in t_g %}'{{ item.title }}',{% endfor %}],
-      datasets: [{
-          label: 'Increase',
-          data: [{% for item in t_g %}{{ item.increase }},{% endfor %}],
-          borderColor: ['rgb(26, 85, 29)'],
-          backgroundColor: [
-          {% for item in t_g %}'{{ item.category_color }}aa',{% endfor %}
+  const data = {
+    labels: [{% for item in t_g %}'{{ item.title }}', {% endfor %}],
+  datasets: [{
+    label: 'Increase',
+    data: [{% for item in t_g %}{{ item.increase }}, {% endfor %}],
+    borderColor: ['rgb(26, 85, 29)'],
+      backgroundColor: [
+        {% for item in t_g %}'{{ item.category_color }}aa', {% endfor %}
           ]
       }],
   };
-      const data1 = {
-      labels: [{% for item in t_g %}'{{ item.title }}',{% endfor %}],
-      datasets: [
-      {
-          label: 'Spending',
-          data: [{% for item in t_g %}{{ item.spending }},{% endfor %}],
-          borderColor: ['rgb(85, 26, 26)'],
-          backgroundColor: [
-              {% for item in t_g %}'{{ item.category_color }}aa',{% endfor %}
+  const data1 = {
+    labels: [{% for item in t_g %}'{{ item.title }}', {% endfor %}],
+  datasets: [
+    {
+      label: 'Spending',
+      data: [{% for item in t_g %}{{ item.spending }}, {% endfor %}],
+    borderColor: ['rgb(85, 26, 26)'],
+      backgroundColor: [
+        {% for item in t_g %}'{{ item.category_color }}aa', {% endfor %}
           ]
       }
       ]};
 
-      const config = {
-          type: 'bar',
-          data: data,
-          options: {
-              indexAxis: 'y',
-              responsive: false,
-              plugins: {
-                  legend: {
-                      labels: {
-                          font: {
-                              size: 16,
-                              weight: 'bold',
-                          },
-                      }
-                  }
-              }
-          },
-      };
-      const config1 = {
-          type: 'bar',
-          data: data1,
-          options: {
-              indexAxis: 'y',
-              responsive: false,
-              plugins: {
-                  legend: {
-                      labels: {
-                          font: {
-                              size: 16,
-                              weight: 'bold',
-                          },
-                      }
-                  }
-              }
-          },
-      };
-
-      Chart.defaults.font.family = 'Source Sans Pro';
-
-      function device_width_chart(x) {
-          if (x.matches) {
-              Chart.defaults.font.size = 32;
-          } else {
-              Chart.defaults.font.size = 16;
+  const config = {
+    type: 'bar',
+    data: data,
+    options: {
+      indexAxis: 'y',
+      responsive: false,
+      plugins: {
+        legend: {
+          labels: {
+            font: {
+              size: 16,
+              weight: 'bold',
+            },
           }
         }
-        var x = window.matchMedia("(max-device-width: 767px)")
-        device_width_chart(x)
-        x.addListener(device_width_chart)
+      }
+    },
+  };
+  const config1 = {
+    type: 'bar',
+    data: data1,
+    options: {
+      indexAxis: 'y',
+      responsive: false,
+      plugins: {
+        legend: {
+          labels: {
+            font: {
+              size: 16,
+              weight: 'bold',
+            },
+          }
+        }
+      }
+    },
+  };
 
-      const ChartInc = new Chart(
-          document.getElementById('ChartInc'),
-          config
-          );
+  Chart.defaults.font.family = 'Source Sans Pro';
 
-      const ChartSpn = new Chart(
-              document.getElementById('ChartSpn'),
-              config1
-              );
+  function device_width_chart(x) {
+    if (x.matches) {
+      Chart.defaults.font.size = 32;
+    } else {
+      Chart.defaults.font.size = 16;
+    }
+  }
+  var x = window.matchMedia("(max-device-width: 767px)")
+  device_width_chart(x)
+  x.addListener(device_width_chart)
+
+  const ChartInc = new Chart(
+    document.getElementById('ChartInc'),
+    config
+  );
+
+  const ChartSpn = new Chart(
+    document.getElementById('ChartSpn'),
+    config1
+  );
 </script>
 {%endblock scripts%} {% endblock content %}

@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 
 from colorfield.fields import ColorField
 
+
 User = get_user_model()
 
 
@@ -50,7 +51,7 @@ class Category(models.Model):
         on_delete=models.CASCADE)
 
     color = ColorField(
-        verbose_name='Color', default='#E3DEDE')
+        verbose_name='Color')
 
     def __str__(self) -> str:
         return f'{self.title}'
@@ -97,10 +98,12 @@ class Action(models.Model):
 class FamilyAccess(models.Model):
 
     wallet = models.ForeignKey(
-        Wallet, on_delete=models.CASCADE)
+        Wallet, on_delete=models.CASCADE
+    )
 
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE)
+        User, on_delete=models.CASCADE
+    )
 
 
 class Profile(models.Model):
@@ -143,3 +146,49 @@ class Objective(models.Model):
     def __str__(self) -> str:
         return f'[{self.user.username}] {self.title} {self.now_amount}\
             /{self.target_amount} {self.currency.title}'
+
+
+class LogTable(models.Model):
+
+    DELETE = 'delete'
+    UPDATE = 'update'
+    CREATE = 'create'
+
+    TYPE_CHOICES = (
+        (DELETE, 'Delete'),
+        (UPDATE, 'Update'),
+        (CREATE, 'Create')
+    )
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE
+    )
+
+    message = models.TextField(
+        verbose_name='Message', blank=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now=True, verbose_name='Created at'
+    )
+
+    a_type = models.CharField(
+        verbose_name="Type", choices=TYPE_CHOICES, max_length=255
+    )
+
+    def __str__(self) -> str:
+        return f'{self.user} | {self.created_at} | {self.message}'
+
+
+class WalletMessage(models.Model):
+
+    wallet = models.ForeignKey(
+        Wallet, on_delete=models.CASCADE
+    )
+
+    message = models.CharField(
+        verbose_name='Message', max_length=150
+    )
+
+    def __str__(self) -> str:
+        return f'{self.wallet} | {self.message}'

@@ -25,13 +25,40 @@
       </div>
     </header>
     <main>
-      {% block content %} {% if messages %}
+      {% block content %}
+      {% if messages %}
       <div class="container message-container">
         {% for message in messages %}
         <span class="message message_{{ message.tags }}">{{ message }}</span>
         {% endfor %}
       </div>
-      {% endif %} {% if currencies %}
+      {% endif %}
+      
+      {% if f_wallets %}
+      <div class="container">
+        <div class="container-title-block">
+          <p class="block-title">Family Access Wallets</p>
+        </div>
+        <hr />
+        <div class="container-content-block">
+          {% for f_wallet in f_wallets %}
+          <div class="block-item mobile-column">
+            <a
+              class="item-title"
+              href="{% url 'wallet-page' wallet_pk=f_wallet.wallet.pk %}"
+            >
+              {{ f_wallet.wallet.user.username }} | {{ f_wallet.wallet.title }}
+            </a>
+            <p class="button-round button-blue-c">
+              {{ f_wallet.wallet.start_amount }} {{f_wallet.wallet.currency.title }}
+            </p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if currencies %}
       <div class="container">
         <div class="container-title-block">
           <p class="block-title">Wallets: {{ wallets.count }}</p>
@@ -72,31 +99,6 @@
           {% endfor %}
         </div>
       </div>
-
-      {% if f_wallets %}
-      <div class="container">
-        <div class="container-title-block">
-          <p class="block-title">Family Access Wallets</p>
-        </div>
-        <hr />
-        <div class="container-content-block">
-          {% for f_wallet in f_wallets %}
-          <div class="block-item mobile-column">
-            <a
-              class="item-title"
-              href="{% url 'wallet-page' wallet_pk=f_wallet.wallet.pk %}"
-            >
-              {{ f_wallet.wallet.user.username }} | {{ f_wallet.wallet.title }}
-            </a>
-            <p class="button-round button-blue-c">
-              {{ f_wallet.wallet.start_amount }} {{
-              f_wallet.wallet.currency.title }}
-            </p>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-      {% endif %}
 
       <div class="container">
         <div class="container-title-block">
