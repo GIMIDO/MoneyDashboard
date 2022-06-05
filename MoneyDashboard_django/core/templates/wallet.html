@@ -1,11 +1,17 @@
-{% extends 'home.html' %} {% block content %}
-
+{% extends 'home.html' %}
+{% block content %}
+{% comment %}
+  Wallet page
+{% endcomment %}
 <div class="container message-container">
+  {% comment %}
+    Messages
+  {% endcomment %}
   <p class="message message_success m-r">
     Wallet owner: {{ wallet.user.username }}
   </p>
   <p class="message message_success m-r">
-    Total amount: {{ total_amount }} {{ wallet.currency.title }}
+    Total amount: {{ total_amount|floatformat:2 }} {{ wallet.currency.title }}
   </p>
   {% if messages %} {% for message in messages %}
   <span class="message message_{{ message.tags }} no-wrap">{{ message }}</span>
@@ -14,6 +20,9 @@
 
 {% if w_messages %}
 <div class="container">
+  {% comment %}
+    Notes container
+  {% endcomment %}
   <div class="container-title-block">
     <p class="block-title">Notes</p>
   </div>
@@ -37,6 +46,9 @@
 {% endif %}
 
 <div class="container">
+  {% comment %}
+    Actions container
+  {% endcomment %}
   <div class="container-title-block mobile-column">
     {% if page_obj %}
     <p class="block-title">{{ count }} actions</p>
@@ -87,7 +99,8 @@
         {{ action.user.username }} | {{ action.title }}
       </a>
       {% else %}
-      <p class="item-title no-hover">
+      <p class="item-title no-hover" 
+      style="border-left: 5px solid {{ action.category.color }};">
         {{ action.user.username }} | {{ action.title }}
       </p>
       {% endif %}
@@ -95,8 +108,7 @@
         <p
           class="button-round button-{% if action.action_type == 'increase' %}green-c{% else %}red-c{% endif %}"
         >
-          {{ action.money }} {{ action.wallet.currency.title }} | {{ action.date
-          }}
+          {{ action.money }} {{ action.wallet.currency.title }} | {{ action.date}}
         </p>
         {% if wallet.user == request.user %}
         <a
@@ -115,6 +127,9 @@
     </div>
     {% endfor %} {% if page_obj.has_other_pages %}
     <span class="pagination">
+      {% comment %}
+        Pagination
+      {% endcomment %}
       {% if page_obj.has_previous %}
       <a href="?page=1" class="button-round button-yellow">First</a>
       <a
@@ -149,6 +164,9 @@
   action="{% url 'search-results' wallet.pk %}?next={{ request.path }}"
   method="get"
 >
+  {% comment %}
+    Search actions
+  {% endcomment %}
   <div class="container-title-block">
     <p class="block-title">Search</p>
     <div class="block-actions">
@@ -187,6 +205,9 @@
 {% endif %}
 
 <div style="display: none">
+  {% comment %}
+    Download actions container
+  {% endcomment %}
   <div class="title_name_block">
     <p class="block-title">Download actions</p>
   </div>
@@ -200,6 +221,9 @@
 
 {% if page_obj %}
 <div class="container">
+  {% comment %}
+    Graphics container
+  {% endcomment %}
   <div class="container-title-block">
     <p class="block-title">Graphics</p>
   </div>
@@ -211,6 +235,9 @@
   <hr />
 
   <div class="container-content-block">
+    {% comment %}
+    Categories in graphics
+    {% endcomment %}
     {% for item in t_g %}
     <div class="block-item mobile-column">
       <a
@@ -218,7 +245,7 @@
         style="border-left: 5px solid {{ item.category_color }};"
         href="{% url 'search-results' wallet.pk %}?category={{item.category_id}}&from=&to="
       >
-        {{ item.title }} {{ item.category_id }}
+        {{ item.title }}
       </a>
       <div class="item-actions">
         <span class="button-round button-blue-c"
@@ -238,6 +265,9 @@
 {% endif %} {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+  {% comment %}
+    Script for create Graphics
+  {% endcomment %}
   const data = {
     labels: [{% for item in t_g %}'{{ item.title }}', {% endfor %}],
   datasets: [{

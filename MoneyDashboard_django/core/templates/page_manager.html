@@ -1,5 +1,13 @@
-{% extends 'home.html' %} {% block content %} {% if messages %}
+{% extends 'home.html' %}
+{% block content %}
+{% comment %}
+  Page manager (for all forms)
+{% endcomment %}
+{% if messages %}
 <div class="container message-container">
+  {% comment %}
+    Messages
+  {% endcomment %}
   {% for message in messages %}
   <span class="message message_{{ message.tags }} no-wrap">{{ message }}</span>
   {% endfor %}

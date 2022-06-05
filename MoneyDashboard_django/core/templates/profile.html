@@ -1,5 +1,13 @@
-{% extends 'home.html' %} {% block content %} {% if messages %}
+{% extends 'home.html' %}
+{% block content %}
+{% comment %}
+  User profile page
+{% endcomment %}
+{% if messages %}
 <div class="container message-container">
+  {% comment %}
+    Messages
+  {% endcomment %}
   {% for message in messages %}
   <span class="message message_{{ message.tags }} no-wrap">{{ message }}</span>
   {% endfor %}
@@ -7,6 +15,9 @@
 {% endif %}
 
 <div class="container">
+  {% comment %}
+    User profile container
+  {% endcomment %}
   <div class="container-title-block">
     <p class="block-title username-page">{{ profile.user.username }} profile</p>
     <div class="block-actions">
@@ -48,6 +59,9 @@
   action="{% url 'search-user' %}?next={{ request.path }}"
   method="get"
 >
+  {% comment %} 
+    Find user container
+  {% endcomment %}
   <div class="container-title-block">
     <p class="block-title">Find user</p>
     <div class="block-actions">

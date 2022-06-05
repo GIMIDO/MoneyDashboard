@@ -1,5 +1,13 @@
-{% extends 'home.html' %} {% block content %}
+{% extends 'home.html' %}
+{% block content %}
+{% comment %}
+  Category manager page
+{% endcomment %}
+
 <div class="container message-container">
+  {% comment %}
+    Messages
+  {% endcomment %}
   {% if messages %} {% for message in messages %}
   <span class="message message_{{ message.tags }} no-wrap">
     {{ message }}
@@ -8,6 +16,9 @@
 </div>
 
 <div class="container">
+  {% comment %}
+    Category container
+  {% endcomment %}
   <div class="container-title-block">
     <p class="block-title">Category Manager</p>
     <div class="block-actions">
@@ -44,9 +55,11 @@
           >Delete</a
         >
       </div>
-      {% else %} {% if category.user == request.user %}
+      {% else %}
+      {% if category.user == request.user %}
       <a
-        class="item-title"
+        class="item-title" 
+        style="border-left: 5px solid {{ category.color }};"
         href="{% url 'update-category' wallet.pk category.pk %}?next={{ request.get_full_path|urlencode }}"
       >
         <span class="only-title">{{ category.user }}</span>
@@ -60,11 +73,12 @@
         >
       </div>
       {% else %}
-      <p class="item-title">
+      <p class="item-title" style="border-left: 5px solid {{ category.color }};">
         <span class="only-title">{{ category.user }}</span>
         <span class="item-name-title"> {{ category.title }} </span>
       </p>
-      {% endif %} {% endif %}
+      {% endif %} 
+      {% endif %}
     </div>
     {% endfor %}
   </div>

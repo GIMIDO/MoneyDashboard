@@ -1,7 +1,14 @@
-{% extends "home.html" %} {% block content %}
+{% extends "home.html" %}
+{% block content %}
+{% comment %}
+  Searched actions page
+{% endcomment %}
 <div class="container message-container">
+  {% comment %}
+    Messages
+  {% endcomment %}
   <p class="message message_success">
-    Amount of this period {{ total_amount }} BYN
+    Amount of this period {{ total_amount|floatformat:2 }} BYN
   </p>
   {% if messages %} {% for message in messages %}
   <span class="message message_{{ message.tags }} no-wrap">{{ message }}</span>
@@ -9,15 +16,27 @@
 </div>
 
 <div class="container">
+  {% comment %}
+    Actions container
+  {% endcomment %}
   <div class="container-title-block">
     {% if page_obj %}
     <p class="block-title">
-      Results {% if q_from %} {%if q_to %} from {{ q_from }} to {{ q_to }} {%
-      else %} from {{ q_from }} {% endif %} {% else %} {% if q_to %} to {{ q_to
-      }} {% endif %} {% endif %} {% if q_category %} ({{ category_out.title }})
-      {{ else }}
+      Results
+      {% if q_from %}
+        {%if q_to %} from {{ q_from }} to {{ q_to }}
+        {%else %} from {{ q_from }} 
+        {% endif %}
+      {% else %} 
+        {% if q_to %} to {{ q_to}}
+        {% endif %}
+      {% endif %}
+      {% if q_category %} ({{ category_out.title }}) 
+      {% endif %}
+      {% if q_type %} ({{ q_type }})
+      {% endif %}
     </p>
-    {% endif %} {% else %}
+    {% else %}
     <p class="block-title">No results</p>
     {% endif %}
     <div class="block-actions">
@@ -47,8 +66,7 @@
         <p
           class="button-round button-{% if action.action_type == 'increase' %}green-c{% else %}red-c{% endif %}"
         >
-          {{ action.money }} {{ action.wallet.currency.title }} | {{ action.date
-          }}
+          {{ action.money }} {{ action.wallet.currency.title }} | {{ action.date }}
         </p>
         {% if wallet.user == request.user %}
         <a
@@ -67,6 +85,9 @@
     </div>
     {% endfor %} {% if page_obj.has_other_pages %}
     <span class="pagination">
+      {% comment %}
+        Pagination
+      {% endcomment %}
       {% if page_obj.has_previous %}
       <a href="?page=1" class="button-round button-yellow">First</a>
       <a
@@ -96,6 +117,9 @@
 </div>
 
 <div style="display: none">
+  {% comment %}
+    Download actions container
+  {% endcomment %}
   {% if page_obj %}
   <div class="title_name_block">
     <p class="block-title">Download actions</p>
@@ -113,6 +137,9 @@
 
 {% if page_obj %}
 <div class="container">
+  {% comment %}
+    Graphics container
+  {% endcomment %}
   <div class="container-title-block">
     <p class="block-title">Graphics</p>
   </div>
@@ -124,6 +151,9 @@
   <hr />
 
   <div class="container-content-block">
+    {% comment %}
+      Categories in graphics
+    {% endcomment %}
     {% for item in t_g %}
     <div class="block-item mobile-column">
       <a
@@ -131,7 +161,7 @@
         style="border-left: 5px solid {{ item.category_color }};"
         href="{% url 'search-results' wallet.pk %}?category={{item.category_id}}&from=&to="
       >
-        {{ item.title }} {{ item.category_id }}
+        {{ item.title }}
       </a>
       <div class="item-actions">
         <span class="button-round button-blue-c"
@@ -151,88 +181,91 @@
 {% endif %} {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-      const data = {
-      labels: [{% for item in t_g %}'{{ item.title }}',{% endfor %}],
-      datasets: [{
-          label: 'Increase',
-          data: [{% for item in t_g %}{{ item.increase }},{% endfor %}],
-          borderColor: ['rgb(26, 85, 29)'],
-          backgroundColor: [
+  {% comment %}
+    Script for create Graphics
+  {% endcomment %}
+  const data = {
+  labels: [{% for item in t_g %}'{{ item.title }}',{% endfor %}],
+  datasets: [{
+      label: 'Increase',
+      data: [{% for item in t_g %}{{ item.increase }},{% endfor %}],
+      borderColor: ['rgb(26, 85, 29)'],
+      backgroundColor: [
+      {% for item in t_g %}'{{ item.category_color }}aa',{% endfor %}
+      ]
+  }],
+};
+  const data1 = {
+  labels: [{% for item in t_g %}'{{ item.title }}',{% endfor %}],
+  datasets: [
+  {
+      label: 'Spending',
+      data: [{% for item in t_g %}{{ item.spending }},{% endfor %}],
+      borderColor: ['rgb(85, 26, 26)'],
+      backgroundColor: [
           {% for item in t_g %}'{{ item.category_color }}aa',{% endfor %}
-          ]
-      }],
-  };
-      const data1 = {
-      labels: [{% for item in t_g %}'{{ item.title }}',{% endfor %}],
-      datasets: [
-      {
-          label: 'Spending',
-          data: [{% for item in t_g %}{{ item.spending }},{% endfor %}],
-          borderColor: ['rgb(85, 26, 26)'],
-          backgroundColor: [
-              {% for item in t_g %}'{{ item.category_color }}aa',{% endfor %}
-          ]
-      }
-      ]};
+      ]
+  }
+  ]};
 
-      const config = {
-          type: 'bar',
-          data: data,
-          options: {
-              indexAxis: 'y',
-              responsive: false,
-              plugins: {
-                  legend: {
-                      labels: {
-                          font: {
-                              size: 16,
-                              weight: 'bold',
-                          },
-                      }
+  const config = {
+      type: 'bar',
+      data: data,
+      options: {
+          indexAxis: 'y',
+          responsive: false,
+          plugins: {
+              legend: {
+                  labels: {
+                      font: {
+                          size: 16,
+                          weight: 'bold',
+                      },
                   }
               }
-          },
-      };
-      const config1 = {
-          type: 'bar',
-          data: data1,
-          options: {
-              indexAxis: 'y',
-              responsive: false,
-              plugins: {
-                  legend: {
-                      labels: {
-                          font: {
-                              size: 16,
-                              weight: 'bold',
-                          },
-                      }
-                  }
-              }
-          },
-      };
-
-      Chart.defaults.font.family = 'Source Sans Pro';
-
-      function device_width_chart(x) {
-          if (x.matches) { // If media query matches
-              Chart.defaults.font.size = 32;
-          } else {
-              Chart.defaults.font.size = 16;
           }
-        }
-        var x = window.matchMedia("(max-device-width: 767px)")
-        device_width_chart(x)
-        x.addListener(device_width_chart)
+      },
+  };
+  const config1 = {
+      type: 'bar',
+      data: data1,
+      options: {
+          indexAxis: 'y',
+          responsive: false,
+          plugins: {
+              legend: {
+                  labels: {
+                      font: {
+                          size: 16,
+                          weight: 'bold',
+                      },
+                  }
+              }
+          }
+      },
+  };
 
-      const ChartInc = new Chart(
-          document.getElementById('ChartInc'),
-          config
+  Chart.defaults.font.family = 'Source Sans Pro';
+
+  function device_width_chart(x) {
+      if (x.matches) {
+          Chart.defaults.font.size = 32;
+      } else {
+          Chart.defaults.font.size = 16;
+      }
+    }
+    var x = window.matchMedia("(max-device-width: 767px)")
+    device_width_chart(x)
+    x.addListener(device_width_chart)
+
+  const ChartInc = new Chart(
+      document.getElementById('ChartInc'),
+      config
+      );
+
+  const ChartSpn = new Chart(
+          document.getElementById('ChartSpn'),
+          config1
           );
-
-      const ChartSpn = new Chart(
-              document.getElementById('ChartSpn'),
-              config1
-              );
 </script>
 {% endblock %} {% endblock %}

@@ -92,7 +92,12 @@ textarea:focus {
   text-overflow: ellipsis;
   width: calc(100% - 280px);
 }
-
+.errorlist {
+  margin-bottom: 8px;
+}
+.errorlist > li {
+  list-style: none;
+}
 /*  MAIN  */
 header {
   max-width: calc(100% - 4vw);
@@ -434,7 +439,10 @@ input.user-search {
     margin: 16px 0;
     border-top: 4px solid #eee1e3;
   }
-
+  input.user-search {
+    max-width: 400px;
+    width: 300px;
+  }
   input,
   select {
     border: 1px solid #eee1e3;

@@ -1,12 +1,19 @@
-{% extends 'home.html' %} {% block content %}
-
+{% extends 'home.html' %}
+{% block content %}
+{% comment %} 
+  Family Access page
+{% endcomment %}
 <div class="container message-container">
+  {% comment %} messages {% endcomment %}
   {% if messages %} {% for message in messages %}
   <span class="message message_{{ message.tags }} no-wrap">{{ message }}</span>
   {% endfor %} {% endif %}
 </div>
 
 <div class="container">
+  {% comment %}
+    Container with added users
+  {% endcomment %}
   <div class="container-title-block">
     <p class="block-title">Users with access</p>
     <div class="block-actions">

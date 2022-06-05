@@ -3,10 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?version=7" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?version=8" />
   </head>
   <body>
+    {% comment %} 
+      Base page (Home page)
+    {% endcomment %}
     <header class="header">
+      {% comment %} 
+        Header
+      {% endcomment %}
       <div class="container-title-block">
         <a class="block-title header-title" href="{% url 'home' %}">Goose</a>
         <div class="block-actions">
@@ -25,9 +31,15 @@
       </div>
     </header>
     <main>
+      {% comment %} 
+        Main content in all pages
+      {% endcomment %}
       {% block content %}
       {% if messages %}
       <div class="container message-container">
+        {% comment %} 
+          Messages
+        {% endcomment %}
         {% for message in messages %}
         <span class="message message_{{ message.tags }}">{{ message }}</span>
         {% endfor %}
@@ -36,6 +48,9 @@
       
       {% if f_wallets %}
       <div class="container">
+        {% comment %}
+          Family Access container
+        {% endcomment %}
         <div class="container-title-block">
           <p class="block-title">Family Access Wallets</p>
         </div>
@@ -49,7 +64,7 @@
             >
               {{ f_wallet.wallet.user.username }} | {{ f_wallet.wallet.title }}
             </a>
-            <p class="button-round button-blue-c">
+            <p class="button-round button-blue-c m-l">
               {{ f_wallet.wallet.start_amount }} {{f_wallet.wallet.currency.title }}
             </p>
           </div>
@@ -60,6 +75,9 @@
 
       {% if currencies %}
       <div class="container">
+        {% comment %}
+          Wallets container
+        {% endcomment %}
         <div class="container-title-block">
           <p class="block-title">Wallets: {{ wallets.count }}</p>
           <div class="block-actions">
@@ -101,6 +119,9 @@
       </div>
 
       <div class="container">
+        {% comment %}
+          Objectives container
+        {% endcomment %}
         <div class="container-title-block">
           <p class="block-title">Objectives: {{ objectives.count }}</p>
           <div class="block-actions">
@@ -144,8 +165,11 @@
       {% endif %}
 
       <div class="container">
+        {% comment %}
+          Cyrrencies container
+        {% endcomment %}
         <div class="container-title-block">
-          <p class="block-title">Currencys</p>
+          <p class="block-title">Currencies</p>
           <div class="block-actions">
             <a
               class="button-round button-green"

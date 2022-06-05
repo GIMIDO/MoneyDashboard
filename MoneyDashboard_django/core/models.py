@@ -9,6 +9,9 @@ User = get_user_model()
 
 
 class Currency(models.Model):
+    '''
+    Currency model in database
+    '''
 
     user = models.ForeignKey(
         User, verbose_name='User', on_delete=models.CASCADE)
@@ -21,6 +24,9 @@ class Currency(models.Model):
 
 
 class Wallet(models.Model):
+    '''
+    Wallet model in database
+    '''
 
     user = models.ForeignKey(
         User,verbose_name='User', on_delete=models.CASCADE)
@@ -31,14 +37,17 @@ class Wallet(models.Model):
     title = models.CharField(
         verbose_name='Wallet', max_length=255)
 
-    start_amount = models.FloatField(
-        verbose_name='Start amount')
+    start_amount = models.DecimalField(
+        verbose_name='Start amount', max_digits=9, decimal_places=2)
 
     def __str__(self) -> str:
         return f'{self.title} {self.currency} {self.start_amount}'
 
 
 class Category(models.Model):
+    '''
+    Category model in database
+    '''
 
     title = models.CharField(
         verbose_name='Category', max_length=25)
@@ -58,6 +67,9 @@ class Category(models.Model):
         
 
 class Action(models.Model):
+    '''
+    Action model in database
+    '''
 
     INCREASE = 'increase'
     SPENDING = 'spending'
@@ -80,7 +92,7 @@ class Action(models.Model):
         max_length=150, verbose_name='Name')
 
     money = models.DecimalField(
-        verbose_name='Price', max_digits=7, decimal_places=2)
+        verbose_name='Price', max_digits=9, decimal_places=2)
 
     date = models.DateField(
         verbose_name='Date', default=timezone.now)
@@ -96,6 +108,9 @@ class Action(models.Model):
 
 
 class FamilyAccess(models.Model):
+    '''
+    Family Access model in database
+    '''
 
     wallet = models.ForeignKey(
         Wallet, on_delete=models.CASCADE
@@ -107,6 +122,9 @@ class FamilyAccess(models.Model):
 
 
 class Profile(models.Model):
+    '''
+    Profile model in database
+    '''
 
     user = models.ForeignKey(
         User, verbose_name='User', on_delete=models.CASCADE)
@@ -128,6 +146,10 @@ class Profile(models.Model):
 
 
 class Objective(models.Model):
+    '''
+    Objective model in database
+    '''
+
     user = models.ForeignKey(
         User, verbose_name='User', on_delete=models.CASCADE)
 
@@ -137,11 +159,11 @@ class Objective(models.Model):
     title = models.CharField(
         verbose_name='title', max_length=255)
 
-    target_amount = models.FloatField(
-        verbose_name='target')
+    target_amount = models.DecimalField(
+        verbose_name='target', max_digits=9, decimal_places=2)
 
-    now_amount = models.FloatField(
-        verbose_name='now', default=0)
+    now_amount = models.DecimalField(
+        verbose_name='now', default=0, max_digits=9, decimal_places=2)
     
     def __str__(self) -> str:
         return f'[{self.user.username}] {self.title} {self.now_amount}\
@@ -149,6 +171,9 @@ class Objective(models.Model):
 
 
 class LogTable(models.Model):
+    '''
+    Model for logs in database
+    '''
 
     DELETE = 'delete'
     UPDATE = 'update'
@@ -181,6 +206,9 @@ class LogTable(models.Model):
 
 
 class WalletMessage(models.Model):
+    '''
+    Wallet notes in database
+    '''
 
     wallet = models.ForeignKey(
         Wallet, on_delete=models.CASCADE

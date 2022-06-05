@@ -1,6 +1,8 @@
 from django.contrib import admin
 from .models import *
 
+
+# display database tables on admin page
 admin.site.register(Action)
 admin.site.register(Category)
 admin.site.register(Wallet)

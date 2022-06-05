@@ -5,23 +5,20 @@ from .models import *
 
 
 class AuthUserMixin(object):
+    '''Checking for an authorized user'''
 
     def dispatch(self, request, *args, **kwargs):
-
         if not request.user.is_authenticated:
-            messages.add_message(request, messages.INFO,
-                'Log in first!'
-            )
-
+            messages.add_message(request, messages.INFO,'Log in first!')
             return redirect('login')
-            
+
         return super().dispatch(request, *args, **kwargs)
 
 
 class OwnerAccessMixin(object):
+    '''Checking the user for the role of the creator of the wallet'''
 
     def dispatch(self, request, *args, **kwargs):
-
         if request.GET.get('next'):
             next = request.GET.get('next')
         else:
@@ -33,10 +30,7 @@ class OwnerAccessMixin(object):
                 pk=kwargs.get('wallet_pk')
             )
         except ObjectDoesNotExist:
-            messages.add_message(request, messages.WARNING,
-                "Error!"
-            )
-
+            messages.add_message(request, messages.WARNING,"Error!")
             return redirect(next)
 
         return super().dispatch(request, *args, **kwargs)
