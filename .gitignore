@@ -150,3 +150,8 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+MoneyDashboard_django/static
+MoneyDashboard_django/media
+MoneyDashboard_django/core/migrations
+!MoneyDashboard_django/core/migrations/__init__.py
