@@ -74,7 +74,7 @@
       {% if wallet.user == request.user %}
       <a
         class="button-round button-blue m-l"
-        href="{% url 'transfer-wallet' wallet.pk %}?next={{ request.path }}"
+        href="{% url 'transfer-wallet' wallet_pk=wallet.pk %}?next={{ request.path }}"
         >Transfer</a
       >
       <a

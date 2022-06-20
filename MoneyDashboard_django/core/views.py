@@ -941,9 +941,9 @@ class MoneyTransfer(AuthUserMixin, View):
             return HttpResponseRedirect(get_next_link(request))
 
     def post(self, request, **kwargs):
-        wallet_pk = kwargs.get('wallet_pk')
-        form = MoneyTransferForm(wallet_pk, request.user, request.POST or None)
-        wallet_from = Wallet.objects.get(pk=wallet_pk)
+        # wallet_pk = kwargs.get('wallet_pk')
+        form = MoneyTransferForm(kwargs.get('wallet_pk'), request.user, Wallet.objects.get(pk=kwargs.get('wallet_pk')).currency, request.POST or None)
+        wallet_from = Wallet.objects.get(pk=kwargs.get('wallet_pk'))
 
         if form.is_valid():
             money = decimal.Decimal(form.cleaned_data['money'])

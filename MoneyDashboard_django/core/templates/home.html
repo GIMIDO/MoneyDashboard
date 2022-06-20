@@ -20,7 +20,7 @@
           <a class="button-round button-yellow" href="{% url 'home' %}">Home</a>
           <a
             class="button-round button-blue m-l username"
-            href="{% url 'profile' request.user %}"
+            href="{% url 'profile' request.user %}?next={{ request.path }}"
             >{{ request.user.username }}</a
           >
           <a class="button-round button-red m-l" href="{% url 'sign-out' %}"
